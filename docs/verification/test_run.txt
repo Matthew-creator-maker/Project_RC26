@@ -1,0 +1,107 @@
+test_bad_label_fails_before_motion (test_grasp_script.GraspTests.test_bad_label_fails_before_motion) ... skipped '请在 requirements-ubuntu22.txt 对应环境运行完整抓取测试'
+test_camera_start_failure_disconnects_arm (test_grasp_script.GraspTests.test_camera_start_failure_disconnects_arm) ... skipped '请在 requirements-ubuntu22.txt 对应环境运行完整抓取测试'
+test_carry_grasps_and_does_not_release_after_retreat (test_grasp_script.GraspTests.test_carry_grasps_and_does_not_release_after_retreat) ... skipped '请在 requirements-ubuntu22.txt 对应环境运行完整抓取测试'
+test_cleanup_does_not_mask_original_failure (test_grasp_script.GraspTests.test_cleanup_does_not_mask_original_failure) ... skipped '请在 requirements-ubuntu22.txt 对应环境运行完整抓取测试'
+test_cleanup_failure_after_success_is_reported (test_grasp_script.GraspTests.test_cleanup_failure_after_success_is_reported) ... skipped '请在 requirements-ubuntu22.txt 对应环境运行完整抓取测试'
+test_cli_cancel_is_130_not_success (test_grasp_script.GraspTests.test_cli_cancel_is_130_not_success) ... skipped '请在 requirements-ubuntu22.txt 对应环境运行完整抓取测试'
+test_cli_failure_is_nonzero (test_grasp_script.GraspTests.test_cli_failure_is_nonzero) ... skipped '请在 requirements-ubuntu22.txt 对应环境运行完整抓取测试'
+test_collected_target_timeout_no_gripper (test_grasp_script.GraspTests.test_collected_target_timeout_no_gripper) ... skipped '请在 requirements-ubuntu22.txt 对应环境运行完整抓取测试'
+test_external_arm_is_not_disconnected_by_action (test_grasp_script.GraspTests.test_external_arm_is_not_disconnected_by_action) ... skipped '请在 requirements-ubuntu22.txt 对应环境运行完整抓取测试'
+test_failed_arm_approach_no_close_or_retry (test_grasp_script.GraspTests.test_failed_arm_approach_no_close_or_retry) ... skipped '请在 requirements-ubuntu22.txt 对应环境运行完整抓取测试'
+test_guard_aborts_before_grasp_if_chassis_moves (test_grasp_script.GraspTests.test_guard_aborts_before_grasp_if_chassis_moves) ... skipped '请在 requirements-ubuntu22.txt 对应环境运行完整抓取测试'
+test_missing_workspace_marker_fails_before_motion (test_grasp_script.GraspTests.test_missing_workspace_marker_fails_before_motion) ... skipped '请在 requirements-ubuntu22.txt 对应环境运行完整抓取测试'
+test_no_display_never_calls_gui_cleanup (test_grasp_script.GraspTests.test_no_display_never_calls_gui_cleanup) ... skipped '请在 requirements-ubuntu22.txt 对应环境运行完整抓取测试'
+test_outside_workspace_never_grasps (test_grasp_script.GraspTests.test_outside_workspace_never_grasps) ... skipped '请在 requirements-ubuntu22.txt 对应环境运行完整抓取测试'
+test_place_only_opens_gripper_without_camera_or_detection (test_grasp_script.GraspTests.test_place_only_opens_gripper_without_camera_or_detection) ... skipped '请在 requirements-ubuntu22.txt 对应环境运行完整抓取测试'
+test_preflight_does_not_open_camera_or_arm (test_grasp_script.GraspTests.test_preflight_does_not_open_camera_or_arm) ... skipped '请在 requirements-ubuntu22.txt 对应环境运行完整抓取测试'
+test_recognize_only_moves_to_observation_but_no_gripper (test_grasp_script.GraspTests.test_recognize_only_moves_to_observation_but_no_gripper) ... skipped '请在 requirements-ubuntu22.txt 对应环境运行完整抓取测试'
+test_release_grasps_puts_back_opens_and_retreats (test_grasp_script.GraspTests.test_release_grasps_puts_back_opens_and_retreats) ... skipped '请在 requirements-ubuntu22.txt 对应环境运行完整抓取测试'
+test_ssh_show_rejected_before_motion (test_grasp_script.GraspTests.test_ssh_show_rejected_before_motion) ... skipped '请在 requirements-ubuntu22.txt 对应环境运行完整抓取测试'
+test_arm_connect_is_idempotent (test_grasp_script.SdkAdapterTests.test_arm_connect_is_idempotent) ... skipped '需要视觉运行依赖'
+test_frame_timeout_is_forwarded_without_starting_camera (test_grasp_script.SdkAdapterTests.test_frame_timeout_is_forwarded_without_starting_camera) ... skipped '需要视觉运行依赖'
+test_nonfinite_pose_does_not_reach_sdk (test_grasp_script.SdkAdapterTests.test_nonfinite_pose_does_not_reach_sdk) ... skipped '需要视觉运行依赖'
+test_action_failure_does_not_continue_to_later_navigation (test_task.TaskTests.test_action_failure_does_not_continue_to_later_navigation) ... === LM1-LM7 Mission Start ===
+[导航] LM1 -> LM2，task_status=2
+[导航] LM1 -> LM2，task_status=4
+[到站] LM2，连续 3 个新状态帧确认静止
+[导航] LM2 -> LM3，task_status=2
+[导航] LM2 -> LM3，task_status=4
+[到站] LM3，连续 3 个新状态帧确认静止
+ok
+test_common_navigation_failures_abort (test_task.TaskTests.test_common_navigation_failures_abort) ... === LM1-LM7 Mission Start ===
+[取消] 底盘已确认取消请求；请核对实际停止状态
+=== LM1-LM7 Mission Start ===
+[导航] LM1 -> LM2，task_status=2
+[取消] 底盘已确认取消请求；请核对实际停止状态
+=== LM1-LM7 Mission Start ===
+[导航] LM1 -> LM2，task_status=2
+[导航] LM1 -> LM2，task_status=4
+[取消] 底盘已确认取消请求；请核对实际停止状态
+=== LM1-LM7 Mission Start ===
+[取消] 底盘已确认取消请求；请核对实际停止状态
+=== LM1-LM7 Mission Start ===
+[取消] 底盘已确认取消请求；请核对实际停止状态
+=== LM1-LM7 Mission Start ===
+[取消] 底盘已确认取消请求；请核对实际停止状态
+=== LM1-LM7 Mission Start ===
+[导航] LM1 -> LM2，task_status=2
+[取消] 底盘已确认取消请求；请核对实际停止状态
+ok
+test_complete_route_and_action_order (test_task.TaskTests.test_complete_route_and_action_order) ... === LM1-LM7 Mission Start ===
+[导航] LM1 -> LM2，task_status=2
+[导航] LM1 -> LM2，task_status=4
+[到站] LM2，连续 3 个新状态帧确认静止
+[导航] LM2 -> LM3，task_status=2
+[导航] LM2 -> LM3，task_status=4
+[到站] LM3，连续 3 个新状态帧确认静止
+[导航] LM3 -> LM4，task_status=2
+[导航] LM3 -> LM4，task_status=4
+[到站] LM4，连续 3 个新状态帧确认静止
+[导航] LM4 -> LM5，task_status=2
+[导航] LM4 -> LM5，task_status=4
+[到站] LM5，连续 3 个新状态帧确认静止
+[导航] LM5 -> LM6，task_status=2
+[导航] LM5 -> LM6，task_status=4
+[到站] LM6，连续 3 个新状态帧确认静止
+[导航] LM6 -> LM7，task_status=2
+[导航] LM6 -> LM7，task_status=4
+[到站] LM7，连续 3 个新状态帧确认静止
+=== Mission Finished at LM7 ===
+ok
+test_config_paths_are_resolved_from_task_file (test_task.TaskTests.test_config_paths_are_resolved_from_task_file) ... ok
+test_full_task_requires_calibration_confirmation_before_factories (test_task.TaskTests.test_full_task_requires_calibration_confirmation_before_factories) ... ok
+test_navigation_failure_never_runs_arm_station_action_and_cancels (test_task.TaskTests.test_navigation_failure_never_runs_arm_station_action_and_cancels) ... === LM1-LM7 Mission Start ===
+[导航] LM1 -> LM2，task_status=2
+[导航] LM1 -> LM2，task_status=5
+[取消] 底盘已确认取消请求；请核对实际停止状态
+ok
+test_navigation_only_goes_all_the_way_to_lm7_without_grasp_programs (test_task.TaskTests.test_navigation_only_goes_all_the_way_to_lm7_without_grasp_programs) ... === LM1-LM7 Mission Start ===
+[导航] LM1 -> LM2，task_status=2
+[导航] LM1 -> LM2，task_status=4
+[到站] LM2，连续 3 个新状态帧确认静止
+[导航] LM2 -> LM3，task_status=2
+[导航] LM2 -> LM3，task_status=4
+[到站] LM3，连续 3 个新状态帧确认静止
+[导航] LM3 -> LM4，task_status=2
+[导航] LM3 -> LM4，task_status=4
+[到站] LM4，连续 3 个新状态帧确认静止
+[导航] LM4 -> LM5，task_status=2
+[导航] LM4 -> LM5，task_status=4
+[到站] LM5，连续 3 个新状态帧确认静止
+[导航] LM5 -> LM6，task_status=2
+[导航] LM5 -> LM6，task_status=4
+[到站] LM6，连续 3 个新状态帧确认静止
+[导航] LM6 -> LM7，task_status=2
+[导航] LM6 -> LM7，task_status=4
+[到站] LM7，连续 3 个新状态帧确认静止
+=== Navigation-only Mission Finished ===
+ok
+test_preview_has_exact_competition_route_without_hardware (test_task.TaskTests.test_preview_has_exact_competition_route_without_hardware) ... ok
+test_reject_bad_route_or_action (test_task.TaskTests.test_reject_bad_route_or_action) ... ok
+test_reject_incomplete_and_string_status (test_task.TaskTests.test_reject_incomplete_and_string_status) ... ok
+test_wrong_start_stops_before_navigation (test_task.TaskTests.test_wrong_start_stops_before_navigation) ... ok
+
+----------------------------------------------------------------------
+Ran 33 tests in 4.657s
+
+OK (skipped=22)

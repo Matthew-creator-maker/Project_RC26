@@ -1,0 +1,51 @@
+{
+  "perception_config": "perception.yaml",
+  "navigation": {
+    "host": "192.168.192.5",
+    "status_port": 19204,
+    "nav_port": 19206,
+    "push_port": 19301,
+    "request_timeout_s": 3.0,
+    "state_timeout_s": 3.0,
+    "navigation_timeout_s": 180.0,
+    "blocked_timeout_s": 1.5,
+    "settled_frames": 3,
+    "suspended_timeout_s": 1.5
+  },
+  "arm_transport": {
+    "configured": true,
+    "joints_deg": [
+      0,
+      90,
+      0,
+      -90,
+      -90,
+      170
+    ]
+  },
+  "task": {
+    "start_station": "LM1",
+    "end_station": "LM7",
+    "target": "Cola"
+  },
+  "route": [
+    "LM1",
+    "LM2",
+    "LM3",
+    "LM4",
+    "LM5",
+    "LM6",
+    "LM7"
+  ],
+  "task_lm3": {
+    "target": "Cola",
+    "action": "release"
+  },
+  "task_lm5": {
+    "target": "Cola",
+    "action": "carry"
+  },
+  "task_lm7": {
+    "action": "place"
+  }
+}

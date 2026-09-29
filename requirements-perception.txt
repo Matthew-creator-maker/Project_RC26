@@ -1,0 +1,6 @@
+ultralytics
+opencv-python
+numpy
+pyyaml
+pyrealsense2
+Pillow>=8.0

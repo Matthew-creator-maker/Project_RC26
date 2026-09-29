@@ -1,0 +1,30 @@
+Single-pass grasp change (0924)
+
+Problem in the old competition flow:
+1) scanner.scan_station() moved to observation pose and ran YOLO.
+2) scan_station() always returned the arm to transport pose.
+3) GraspProgram.run() then moved to observation pose again, loaded/ran vision again,
+   and tried to collect 10 stable points under the same short 6 s timeout.
+
+New competition flow:
+transport -> observation ONCE -> stable target lock -> collect 10 stable xyz points
+in the SAME camera/YOLO session -> median xyz -> grasp -> transport -> LM7 -> release.
+
+Timeouts:
+- target search: 8 s default (--grasp-timeout-seconds)
+- after target lock, 10-point sampling: 20 s default
+  (--grasp-sample-timeout-seconds)
+- stable_samples remains 10 in config/perception.yaml.
+
+Performance:
+- CompetitionScanner reuses one YOLO model, RealSense session and arm connection.
+- No second model initialization per grasp.
+- Terminal prints average YOLO inference seconds/frame for real-hardware diagnosis.
+- A transient unstable frame no longer clears all already collected stable points;
+  new points are still accepted only when the perception pipeline reports stable=true.
+
+Safety/robustness:
+- missed frames do not erase all samples;
+- if a reappearing target jumps > 0.08 m from the current sample median,
+  the sample set is restarted instead of mixing two target positions;
+- Cartesian grasp motion exceptions call arm.stop_best_effort().

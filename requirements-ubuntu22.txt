@@ -1,0 +1,12 @@
+# Python 3.10; CPU baseline. Install torch/torchvision first as described in README.
+# Model checkpoint was produced with ultralytics 8.3.203.
+ultralytics==8.3.203
+numpy==1.26.4
+opencv-python==4.10.0.84
+Pillow==10.4.0
+PyYAML==6.0.2
+pyrealsense2==2.56.5.9235
+Robotic_Arm==1.1.6
+torch==2.6.0
+torchvision==0.21.0
+pyserial==3.5

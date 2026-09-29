@@ -1,0 +1,15 @@
+0924 in-field retry loop
+
+1. Recognition/announcement: LM2 -> LM3 -> LM4 -> LM5 -> LM6.
+2. First grasp pass: LM6 -> LM5 -> LM4 -> LM3 -> LM2.
+3. Retry passes never return to LM1. They traverse:
+   LM2 -> LM3 -> LM4 -> LM5 -> LM6 -> LM2 -> ...
+4. Completed stations are traversed but skipped for grasp.
+5. Unfinished stations are re-recognized and re-attempted.
+6. Timeout/no stable target keeps the station unfinished.
+7. Workspace outside_x/y/z keeps the station unfinished and does not terminate
+   the mission; the arm is returned to transport pose and the next recognition
+   station is processed.
+8. Other RuntimeError values still abort for hardware safety.
+9. Every successful grasp still goes to LM7 before continuing.
+10. At the 8-minute limit, stop new grasps and go to LM8.

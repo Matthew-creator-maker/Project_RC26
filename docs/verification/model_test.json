@@ -1,0 +1,38 @@
+{
+  "platform": "win32",
+  "python": "3.10.11 (tags/v3.10.11:7d4cc5a, Apr  5 2023, 00:38:17) [MSC v.1929 64 bit (AMD64)]",
+  "torch": "2.6.0+cpu",
+  "ultralytics": "8.3.203",
+  "labels": {
+    "0": "Cola",
+    "1": "Dishsoap",
+    "2": "Lays",
+    "3": "Sprite",
+    "4": "Water",
+    "5": "Orange_juice",
+    "6": "Handwash",
+    "7": "Shampoo",
+    "8": "Biscuit",
+    "9": "Chip",
+    "10": "Cookie",
+    "11": "Piaorou"
+  },
+  "source_image": "原 9.15/test_image/raw/test_cola.jpg",
+  "detections": [
+    {
+      "label": "Cola",
+      "class_id": 0,
+      "confidence": 0.7196444272994995,
+      "bbox": [
+        983.6015014648438,
+        210.47897338867188,
+        1929.6746826171875,
+        4031
+      ],
+      "pixel_center": [
+        1457,
+        2121
+      ]
+    }
+  ]
+}
