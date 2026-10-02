@@ -1,0 +1,44 @@
+{
+  "source_directory": "D:\\robocup_embody",
+  "source_main_sha256": "6e3dbb6930afc0ceefbd4d639382406ed94022e064d43c657a376ca5686b97d3",
+  "merged_main_sha256": "ebc328bf431294a69d8b835392fca12a51e1ecf0fc71adb6daca4e3d2d3abfed",
+  "task_config_sha256": "9cdc98760c64ec0650e98127faa84951559c3ddb1e0ae21c35edf197ecb86800",
+  "changed_production_files": [
+    "app/main.py"
+  ],
+  "preserved": {
+    "scan_seconds": 8,
+    "scan_nav_stations": {},
+    "startup_transport": true,
+    "teammate_recovery_function_ast_unchanged": true,
+    "grasp_loop_ast_unchanged_except_retry_route": true
+  },
+  "hardware_connected": false,
+  "source_line_numbers": {
+    "build_parser": 82,
+    "load_settings": 137,
+    "CompetitionPlan": 150,
+    "competition_plan": 185,
+    "CompetitionScanner.__init__": 233,
+    "CompetitionScanner._ensure_camera": 264,
+    "CompetitionScanner.scan_station": 368,
+    "CompetitionScanner.close": 637,
+    "_print_competition_preview": 1244,
+    "run_competition": 716,
+    "_recover_grasp_station": 699
+  },
+  "merged_line_numbers": {
+    "build_parser": 74,
+    "load_settings": 132,
+    "CompetitionPlan": 147,
+    "competition_plan": 201,
+    "CompetitionScanner.__init__": 260,
+    "CompetitionScanner._ensure_camera": 303,
+    "CompetitionScanner.scan_station": 408,
+    "CompetitionScanner.close": 657,
+    "_print_competition_preview": 1275,
+    "run_competition": 740,
+    "_recover_grasp_station": 723,
+    "CompetitionScanner.finish_recognition": 412
+  }
+}

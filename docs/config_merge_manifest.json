@@ -1,0 +1,30 @@
+{
+  "source_directory": "D:\\robocup_embody",
+  "source_sha256": {
+    "app/main.py": "0771f25b6207c2639723d9f12751545fc6def267acac488614e1a00b1d3d77c0",
+    "config/task_config.json": "9cdc98760c64ec0650e98127faa84951559c3ddb1e0ae21c35edf197ecb86800",
+    "config/perception.yaml": "51973669b8fbb24cef697512dd2aff4786354ae1c9ec3341fbee7e8c823dc00a",
+    "tests/test_latest_multicamera_merge.py": "7083fbe5f907f1cc38c8f99d0cb3128d59d38f25951aa651ffb8850cd609cf4d",
+    "tests/test_competition_retry_queue.py": "e66adf1f77dd9ef565111bf6df4f859f5d06ef1b53a428cfeda08d12131a0103"
+  },
+  "merged_sha256": {
+    "app/main.py": "c932fbf93c808ad04bd946557254a8ba84e05f9e5dc7863c9ad8edd97cad1b13",
+    "config/task_config.json": "e1ea2c54e5492182b2139665ef1a4707e2e1c65449990218b86be509a4495f17",
+    "config/perception.yaml": "bdafe5406e741b7cd4672fe5a57fa3bd8e112d2b9af086cff7dd91e61a0dcd71",
+    "tests/test_latest_multicamera_merge.py": "cf195be1c3693764df0a9bb5ed7741068c1370d0b987d251fcf8557c078ad845",
+    "tests/test_competition_retry_queue.py": "edd637c45f7e60b8b73b65f9b3af45282c5fef040f42f16c7699fe2f2a987a41"
+  },
+  "task_config_values_unchanged": true,
+  "perception_values_unchanged": true,
+  "recognition_config_sha256": "11471e6b8b875b7185adbd8436330090230c201e17dcf328b8df87e6235776fa",
+  "scan_nav_stations": {},
+  "scan_seconds": 6,
+  "camera_serials": {
+    "left": "109122070489",
+    "chest": "151222073707",
+    "head": "151222072331"
+  },
+  "hardware_connected": false,
+  "current_grasp_loop_ast_unchanged_except_retry_route": true,
+  "preserved_grasp_sdk_failure_policy": "abort"
+}

@@ -1,0 +1,15 @@
+{
+  "tests": 66,
+  "failures": 0,
+  "errors": 0,
+  "skipped": 0,
+  "by_file": {
+    "test_multicamera_recognition.py": 35,
+    "test_competition_retry_queue.py": 10,
+    "test_gripper_ack.py": 7,
+    "test_task.py": 12,
+    "test_latest_multicamera_merge.py": 2
+  },
+  "syntax_files": 80,
+  "hardware_connected": false
+}

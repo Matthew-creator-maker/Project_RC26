@@ -1,18 +1,15 @@
-# 两阶段共用的 YOLO 模型，以及第二阶段左臂相机抓取配置。
-# 第一阶段胸部/头部序列号和识别点分组在 recognition.yaml，不能改下面 camera 来切换它们。
-# task_config.json 的 competition.scan_route 是识别顺序，grasp_priority 是抓取点。
+# 王负责的第一阶段视觉配置
 # 先使用 CPU，确认流程正确后再根据电脑环境改成 GPU。
 
 camera:
-  # 原左臂眼在手上相机：仅负责第二阶段重新定位/抓取；与胸部、头部相机独立。
-  # 若实物已更换，必须同步修改并重新验证标定；不要填胸部/头部的序列号。
+  # test_0914.py 使用的眼在手上相机；若实物已更换，必须同步修改并重新验证标定。
   serial: "109122070489"
   width: 640
   height: 480
   fps: 30
 
 model:
-  # 路径相对于本 perception.yaml 所在目录，支持 Ubuntu；两个阶段复用该模型。
+  # 路径相对于本 config.yaml 所在目录，支持 Ubuntu。
   weights: "../assets/models/RoboCup923.pt"
   confidence: 0.5
   iou: 0.45
@@ -68,16 +65,15 @@ grasp_test:
   timeout_seconds: 30
   stable_samples: 10
   # 硬件安全门：范围必须和当前机械臂基座坐标系的实测安全范围一致。
-  # 本次保留队友当前 x/y/z 的 [-1, 1]，不自动扩大运动范围。
-  # 旧 LM5 日志出现过 y=-1.146 m；按当前 y 下限 -1.0 会被判为越界。
-  # 是否允许该位置必须依据真实安装和实测范围重新确认，不能只为通过检查改范围。
+  # 0926 实机日志中 LM5 目标中心 y=-1.106 m，工具偏移后的最终抓取点
+  # y=-1.146 m；原 [-1,1] 的 y 下限会把这个已识别目标误判为越界。
   workspace_configured: true
   workspace_m:
     x: [-1.0, 1.0]
     y: [-1.0, 1.0]
     z: [-1.0, 1.0]
 
-  # 与 workspace 分离的关节空间安全保护；两个检查均按当前配置生效。
+  # 与 workspace 分离的关节空间安全保护。workspace 继续保持宽松，避免重现误拦截。
   motion_safety:
     enabled: true
     ik_precheck: true
@@ -87,9 +83,7 @@ grasp_test:
     j3_min_abs_deg: 8.0
 
 # ============================================================================
-# 【第二阶段：左臂抓取高度的主要修改区】
-# 这里只配置 grasp_priority 中允许抓取的点，不选择第一阶段胸部/头部相机。
-# 仅拿识别分的高柜点：加入 scan_route 和 head.stations 即可，不必启用下方高柜抓取档。
+# 【不同高度识别/抓取的唯一主要修改区】
 # 1) stations：直接在每个高度下面填写属于该高度的 LM 导航点。
 #    例如 stations: [LM3, LM4]，表示 LM3/LM4 都使用这一高度。
 # 2) rail_position_inc：该高度的导轨编码位置，必须实机标定。
@@ -114,8 +108,7 @@ height_profiles:
     transition_tool_offset_m: [0.0, 0.0, -0.10]
 
   table_0_5m:
-    # 【LM点分配】示例：真实 0.5m 抓取点若叫 LM20/LM21，就写 [LM20, LM21]。
-    # 示例点还要加入 grasp_priority；不要把当前门外离场点 LM8 填进抓取档。
+    # 【LM点分配】示例：要把 LM8/LM9 分给 0.5m，就写 [LM8, LM9]。
     stations: []
     enabled: false  # TODO 实机标定后改 true
     nominal_height_m: 0.5
@@ -177,7 +170,5 @@ height_profiles:
 
 
 display:
-  # 原独立抓取工具的显示默认值。
-  # 完整比赛由 recognition.yaml 的 show_window 统一控制识别/抓取画面。
-  # main 的 --show / --no-show 优先于识别 YAML；SSH 无桌面时用 --no-show。
+  # Ubuntu 机器人可通过 SSH 无桌面运行；需要窗口时显式加 --show。
   show_window: false

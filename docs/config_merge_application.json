@@ -1,0 +1,17 @@
+{
+  "applied": true,
+  "project": "D:\\robocup_embody",
+  "backup_directory": "D:\\robocup_embody\\docs\\backups\\before_config_merge_20261002_152900",
+  "updated_production_files": [
+    "config/task_config.json",
+    "config/perception.yaml",
+    "app/main.py"
+  ],
+  "config_values_unchanged": true,
+  "scan_nav_stations": {},
+  "scan_seconds": 6,
+  "main_camera_integration_restored": true,
+  "current_grasp_loop_preserved": true,
+  "hardware_connected": false,
+  "timestamp": "20261002_152900"
+}

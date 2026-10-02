@@ -1,0 +1,12 @@
+{
+  "applied": true,
+  "project": "D:\\robocup_embody",
+  "updated_production_files": [
+    "app/main.py"
+  ],
+  "backup": "D:\\robocup_embody\\docs\\backups\\before_latest_multicamera_20261002_151253\\main.py.bak",
+  "original_main_sha256": "6e3dbb6930afc0ceefbd4d639382406ed94022e064d43c657a376ca5686b97d3",
+  "merged_main_sha256": "ebc328bf431294a69d8b835392fca12a51e1ecf0fc71adb6daca4e3d2d3abfed",
+  "timestamp": "20261002_151253",
+  "hardware_connected": false
+}

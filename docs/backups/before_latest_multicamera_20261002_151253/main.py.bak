@@ -1,8 +1,20 @@
-"""队友当前比赛流程与配套配置的多相机合并版本。
+"""Competition mission controller for pre-mapped LM-station navigation.
 
-task_config.json 管路线；recognition.yaml 管胸部/头部分组；perception.yaml 管模型与左臂抓取。
-识别播报完成后才抓取；保留当前 6 秒默认时间与 SDK 故障即终止的抓取策略。
-当前 JSON 的导航映射为空；填写说明见 04_队友配置合并说明.md。
+Default competition strategy (no online mapping is required):
+
+1. Scan and announce in the fixed LM2 -> LM6 order.
+2. Start the first grasp pass in LM6 -> LM2 order.  Every grasp station is
+   re-scanned on arrival; at most one object is attempted per station visit.
+3. A successful grasp always goes to SCORE_STATION (LM7) before continuing.
+4. Stations that were not successfully grasped stay in a retry queue.  After the
+   first LM6 -> LM2 pass, only those failed stations are revisited, preserving
+   the same descending order (for example LM5 -> LM4).
+5. A station is removed from the retry queue only after a successful grasp and
+   LM7 placement.  Retry until the queue is empty or the total mission time
+   reaches MATCH_SECONDS (8 minutes by default), then go to EXIT_STATION (LM8).
+
+The existing perception, grasp, and navigation implementations are reused.
+This file only changes the competition-level scheduling/state-machine logic.
 """
 from __future__ import annotations
 
@@ -10,15 +22,12 @@ import argparse
 import json
 import sys
 import time
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, Callable
 
 from modules.navigation.navigation_adapter import Navigator
 from modules.grasp.grasp_entry import GraspProgram, load_grasp_module, transport_joints
-from modules.perception.recognition_config import (
-    display_enabled, load_recognition_settings, station_name,
-)
 
 
 BASE = Path(__file__).resolve().parent
@@ -51,14 +60,14 @@ SCAN_ROUTE = ["LM2", "LM3", "LM4", "LM5", "LM6"]
 # 播报阶段单独使用的导航点：键是物品所属任务点，值是较远的播报观察点。
 # 例如在 RoboShop 中新增远处 LM15 后，改为 {"LM5": "LM15"}。
 # 未配置的任务点在播报和抓取阶段使用同一个 LM 点。
-SCAN_NAV_STATIONS: dict[str, str] = {}  # 与当前 JSON 一致；新增映射请在 JSON 中填写。
+SCAN_NAV_STATIONS: dict[str, str] = {}
 HOME_STATION = "LM6"
 SCORE_STATION = "LM7"
 EXIT_STATION = "LM8"
 GRASP_PRIORITY = ["LM6", "LM5", "LM4", "LM3", "LM2"]
 
 MATCH_SECONDS = 480.0
-SCAN_SECONDS_PER_STATION = 6.0 #修改识别时间
+SCAN_SECONDS_PER_STATION = 8.0 #修改识别时间
 EXIT_RESERVE_SECONDS = 45.0
 GRASP_REDETECT_TIMEOUT_SECONDS = 8.0
 GRASP_SAMPLE_TIMEOUT_SECONDS = 20.0
@@ -79,10 +88,7 @@ def build_parser() -> argparse.ArgumentParser:
         action="store_true",
         help="确认当前手眼标定和机械臂安装未改变",
     )
-    display = parser.add_mutually_exclusive_group()
-    display.add_argument("--show", dest="show", action="store_true", help="强制显示识别与抓取画面")
-    display.add_argument("--no-show", dest="show", action="store_false", help="关闭画面，适合无桌面 SSH")
-    parser.set_defaults(show=None)  # 未指定时采用 recognition.yaml 的 show_window。
+    parser.add_argument("--show", action="store_true", help="显示视觉识别窗口")
     parser.add_argument(
         "--navigation-only",
         action="store_true",
@@ -133,8 +139,6 @@ def load_settings(path: str | Path = CONFIG_DIR / "task_config.json", args=None)
     path = Path(path).resolve()
     config = json.loads(path.read_text(encoding="utf-8-sig"))
     config["perception_config"] = _resolve_path(path.parent, config["perception_config"])
-    if "recognition_config" in config:
-        config["recognition_config"] = _resolve_path(path.parent, config["recognition_config"])
     return config
 
 
@@ -150,18 +154,6 @@ class CompetitionPlan:
     score_station: str
     exit_station: str
     grasp_priority: tuple[str, ...]
-    scan_nav_stations: dict[str, str] = field(default_factory=dict)
-
-    @property
-    def grasp_retry_route(self) -> tuple[str, ...]:
-        """后续抓取轮保留原扫描方向，但只包含显式配置的抓取点。
-
-        扫描有 LM9（头部识别高柜）、抓取列表没有 LM9 时，永远不会抓 LM9。
-        只出现在抓取列表中的点补到末尾，避免漏掉这些站点的重试。
-        """
-        return tuple(station for station in self.scan_route if station in self.grasp_priority) + tuple(
-            station for station in self.grasp_priority if station not in self.scan_route
-        )
 
     def validate(self) -> None:
         values = [self.start_station, self.home_station, self.score_station, self.exit_station]
@@ -171,14 +163,7 @@ class CompetitionPlan:
             raise ValueError("SCAN_ROUTE 不能为空")
         if not self.grasp_priority:
             raise ValueError("GRASP_PRIORITY 不能为空")
-        for route in (self.scan_route, self.grasp_priority):
-            if any(not isinstance(item, str) or not item.strip() for item in route):
-                raise ValueError("路线中的点位必须是非空字符串")
-            if len(route) != len(set(route)):
-                raise ValueError("同一条路线不能重复填写点位")
-        if self.exit_station in self.scan_route or self.exit_station in self.grasp_priority:
-            raise ValueError("门外 exit_station 不能放进识别/抓取路线；扩展 LM1~LM9 时请重新设置离场点")
-        for task_station, scan_station in self.scan_nav_stations.items():
+        for task_station, scan_station in SCAN_NAV_STATIONS.items():
             if task_station not in self.scan_route:
                 raise ValueError(f"播报导航映射的任务点 {task_station} 不在 SCAN_ROUTE 中")
             if not isinstance(scan_station, str) or not scan_station.strip():
@@ -197,25 +182,14 @@ class CompetitionPlan:
             raise ValueError("EXIT_STATION 不能与 SCORE_STATION 相同，请单独打一个门外离场点")
 
 
-def competition_plan(config: dict[str, Any] | None = None) -> CompetitionPlan:
-    """JSON 是新路线入口；旧任务/旧测试未提供 competition 时沿用原常量。"""
-    cfg = (config or {}).get("competition", {})
-    if not isinstance(cfg, dict):
-        raise ValueError("task_config.json 的 competition 必须是字典")
-    for key in ("scan_route", "grasp_priority"):
-        if key in cfg and not isinstance(cfg[key], list):
-            raise ValueError(f"competition.{key} 必须是列表")
-    nav_map = cfg.get("scan_nav_stations", SCAN_NAV_STATIONS)
-    if not isinstance(nav_map, dict):
-        raise ValueError("competition.scan_nav_stations 必须是字典")
+def competition_plan() -> CompetitionPlan:
     plan = CompetitionPlan(
-        start_station=station_name(cfg.get("start_station", START_STATION)),
-        scan_route=tuple(station_name(item) for item in cfg.get("scan_route", SCAN_ROUTE)),
-        home_station=station_name(cfg.get("home_station", HOME_STATION)),
-        score_station=station_name(cfg.get("score_station", SCORE_STATION)),
-        exit_station=station_name(cfg.get("exit_station", EXIT_STATION)),
-        grasp_priority=tuple(station_name(item) for item in cfg.get("grasp_priority", GRASP_PRIORITY)),
-        scan_nav_stations={station_name(key): station_name(value) for key, value in nav_map.items()},
+        start_station=START_STATION,
+        scan_route=tuple(SCAN_ROUTE),
+        home_station=HOME_STATION,
+        score_station=SCORE_STATION,
+        exit_station=EXIT_STATION,
+        grasp_priority=tuple(GRASP_PRIORITY),
     )
     plan.validate()
     return plan
@@ -249,24 +223,18 @@ def _speak_label(label: str, attempts: int = 2) -> bool:
 
 
 class CompetitionScanner:
-    """先按点位分组用胸部/头部识别，再用原左臂相机重新定位并抓取。
+    """比赛感知/抓取控制器。
 
-    第一阶段保持运输姿态；第二阶段保留当前队友的高度档和抓取异常处理。
-    三份配置的填写方法见 04_队友配置合并说明.md。
+    阶段 1（识别播报）开始时机械臂先进入初始/运输位姿；
+    后续只保留导航、等待和模拟播报，不启动相机，也不切换到识别位姿。
+    阶段 2（识别抓取）仍按原流程进入识别位姿、启用 RealSense 和真实视觉识别。
     """
 
     def __init__(self, config: dict[str, Any], args: argparse.Namespace):
         self.config = config
         self.args = args
-        # 全图识别点必须在出发前完成分组检查；不等走到高柜才发现漏填相机。
-        self.recognition_settings = load_recognition_settings(config)
-        plan = competition_plan(config)
-        self.recognition_settings.validate_route(plan.scan_route)
         self.module = load_grasp_module()
         self.vision_config = self.module.load_config(str(config["perception_config"]))
-        self.recognition_settings.validate_route(
-            plan.scan_route, left_serial=str(self.vision_config.get("camera", {}).get("serial", ""))
-        )
         self.pipeline = self.module.PerceptionPipeline(self.vision_config)
         self.arm = self.module.RealManArm(self.vision_config, execute=True)
         self.camera = self.module.RealSenseCamera(self.vision_config)
@@ -275,12 +243,7 @@ class CompetitionScanner:
         self.settle_seconds = float(
             self.vision_config.get("arm", {}).get("observation_settle_seconds", 1.5)
         )
-        self.show = display_enabled(args.show, self.recognition_settings)
-        # 两阶段共用 YOLO 模型；识别服务不控制机械臂、不产生抓取坐标。
-        from modules.perception.recognition_service import RecognitionService
-        self.recognition_service = RecognitionService(
-            self.recognition_settings, self.pipeline.detector, show=self.show
-        )
+        self.show = bool(args.show)
         self._arm_connected = False
         self._camera_started = False
 
@@ -300,7 +263,6 @@ class CompetitionScanner:
 
     def _ensure_camera(self, guard) -> None:
         if not self._camera_started:
-            self.finish_recognition()  # 先释放胸部/头部设备，再启用原左臂相机。
             self._guarded(guard, self.camera.start)
             self._camera_started = True
 
@@ -404,14 +366,34 @@ class CompetitionScanner:
             time.sleep(min(0.1, max(0.0, deadline - time.monotonic())))
 
     def scan_station(self, station: str, seconds: float, guard) -> list[dict[str, Any]]:
-        """第一阶段按 LM 选胸部/头部相机，不移动左臂到观察姿态。"""
-        return self.recognition_service.scan_station(station, seconds, guard)
+        """阶段 1 的模拟识别。
 
-    def finish_recognition(self) -> None:
-        """阶段边界释放识别设备与窗口，后面使用左臂相机重新定位。"""
-        service = getattr(self, "recognition_service", None)
-        if service is not None:
-            service.close()
+        保留每个播报点原本的识别等待时间，但不启动摄像头，
+        机械臂保持阶段开始时设置好的初始/运输位姿，不切换到识别位姿；
+        固定模拟返回一个 cola，供上层继续执行语音播报流程。
+        """
+        if seconds <= 0:
+            raise ValueError("--scan-seconds 必须大于 0")
+
+        guard()
+        print(
+            f"[模拟识别] {station}: 到达播报点；机械臂保持初始/运输位姿、摄像头不启动，"
+            f"等待 {seconds:.1f} 秒。",
+            flush=True,
+        )
+
+        # 模拟真实识别所需时间。等待期间持续检查底盘仍位于当前播报导航点。
+        self._wait_with_guard(seconds, guard)
+        guard()
+
+        result = {
+            "label": "cola",
+            "confidence": 1.0,
+            "stable": True,
+            "simulated": True,
+        }
+        print(f"[模拟识别] {station}: 完成 -> cola", flush=True)
+        return [result]
 
 
     def _grasp_station_from_observation(
@@ -654,10 +636,6 @@ class CompetitionScanner:
 
     def close(self) -> None:
         errors = []
-        try:
-            self.finish_recognition()
-        except Exception as exc:
-            errors.append(f"识别相机/窗口: {exc}")
         if self._camera_started:
             try:
                 self.camera.stop()
@@ -718,6 +696,23 @@ def _prepare_rail_for_station(rail, scanner, station: str) -> None:
         rail.prepare(station)
 
 
+def _recover_grasp_station(scanner, rail, navigator, station: str) -> None:
+    """Only permit chassis motion after both arm and rail are back in travel pose."""
+    guard = lambda: navigator.assert_at(station)
+    try:
+        # An SDK motion failure may leave the arm moving. Stop it before recovery.
+        arm = getattr(scanner, "arm", None)
+        if arm is not None and hasattr(arm, "stop_best_effort"):
+            arm.stop_best_effort()
+        scanner.transport(guard)
+        rail.travel()
+    except Exception as exc:
+        raise RuntimeError(
+            f"{station} 抓取失败后无法确认机械臂和导轨已复位，禁止移动底盘"
+        ) from exc
+    print(f"[抓取恢复] {station}: 机械臂与导轨已回行驶位，继续下一任务点。", flush=True)
+
+
 def run_competition(
     config: dict[str, Any],
     args: argparse.Namespace,
@@ -727,7 +722,7 @@ def run_competition(
     rail_factory: Callable[..., Any] | None = None,
 ) -> dict[str, Any]:
     """运行比赛策略：LM2->LM6 播报 -> LM6->LM2 抓取 -> 失败点重试 -> LM7 得分 -> LM8 离场。"""
-    plan = competition_plan(config)
+    plan = competition_plan()
 
     if args.scan_seconds <= 0 or args.match_seconds <= 0:
         raise ValueError("扫描时间和任务总时长必须大于 0")
@@ -746,14 +741,6 @@ def run_competition(
         "exit": plan.exit_station,
     }
     if not args.execute:
-        if "recognition_config" in config:
-            settings = load_recognition_settings(config)
-            settings.validate_route(plan.scan_route, require_serial=False)
-            preview["recognition_cameras"] = {
-                station: {"role": settings.camera_for_station(station).role,
-                          "serial": settings.camera_for_station(station).serial}
-                for station in plan.scan_route
-            }
         return preview
 
     if not args.navigation_only and not args.confirm_calibration:
@@ -784,7 +771,7 @@ def run_competition(
 
         if args.navigation_only:
             for station in plan.scan_route:
-                scan_nav_station = plan.scan_nav_stations.get(station, station)
+                scan_nav_station = SCAN_NAV_STATIONS.get(station, station)
                 if not _navigate_or_skip(navigator, scan_nav_station, "导航测试"):
                     continue
             if navigator.current_station() != plan.home_station:
@@ -799,11 +786,11 @@ def run_competition(
         if rail_factory is None:
             from modules.hardware.mission_slide.controller import MissionSlide
             rail_factory = MissionSlide
+        rail = rail_factory()
         scanner = scanner_factory(config, args)
-        rail = rail_factory()  # 相机分组/模型预检完成后再创建导轨驱动。
 
         # 播报阶段开始前，机械臂先进入初始/运输位姿。
-        # 胸部/头部真实识别时保持运输位姿，不让左臂切换到 observation_pose。
+        # 后续 LM2~LM6 模拟识别过程中保持该位姿，不再切换到 observation_pose。
         scanner.transport(lambda: navigator.assert_at(plan.start_station))
 
         for station in plan.scan_route:
@@ -812,7 +799,7 @@ def run_competition(
                 print("[时间] 已达到任务总时长，停止继续扫描。", flush=True)
                 break
             rail.travel()
-            scan_nav_station = plan.scan_nav_stations.get(station, station)
+            scan_nav_station = SCAN_NAV_STATIONS.get(station, station)
             if not _navigate_or_skip(navigator, scan_nav_station, "扫描"):
                 continue
             if scan_nav_station != station:
@@ -829,17 +816,18 @@ def run_competition(
                 if not label:
                     continue
 
-                # [多相机接入] 真实检测结果按类别去重；不再每到一点固定播报 cola。
+                # 模拟识别阶段每个任务点都完整执行一次语音播报，便于验证
+                # “导航 -> 等待 -> 播报 -> 下一点”的整轮流程。
+                # 将来恢复真实识别时，仍保留原来的“同类别只播报一次”规则。
                 if label not in object_station:
                     object_station[label] = station
-                if label not in announced_labels:
+
+                if detected.get("simulated") is True:
                     if _speak_label(label):
                         announced_labels.add(label)
-
-        # [多相机接入] 识别阶段完成，释放胸部/头部设备，抓取阶段再启用左臂。
-        finish_recognition = getattr(scanner, "finish_recognition", None)
-        if callable(finish_recognition):
-            finish_recognition()
+                elif label not in announced_labels:
+                    if _speak_label(label):
+                        announced_labels.add(label)
 
         # 正常情况下固定播报路线结束时已经位于 LM6；如果因为临时导航失败
         # 没到 LM6，且总时间还没到，则补到 LM6 后再开始 LM6 -> LM2 抓取。
@@ -901,7 +889,7 @@ def run_competition(
                 )
             else:
                 current_round = [
-                    station for station in plan.grasp_retry_route
+                    station for station in plan.scan_route
                     if station not in completed_stations
                 ]
                 print(
@@ -945,7 +933,6 @@ def run_competition(
                         round_unconfirmed.append(station)
                         continue
 
-                _prepare_rail_for_station(rail, scanner, station)
                 # 每到一个抓取点都必须进入识别位姿并现场识别一次。
                 # 不再因为扫描阶段没有记录到该点而跳过。
                 recorded_labels = labels_by_station.get(station, [])
@@ -968,6 +955,7 @@ def run_competition(
                 )
 
                 try:
+                    _prepare_rail_for_station(rail, scanner, station)
                     # 这里故意传 expected_labels=None：
                     # 抓取阶段必须能发现扫描阶段漏检、位置变化或同类新增的物品。
                     result = scanner.grasp_station_once(
@@ -990,15 +978,10 @@ def run_competition(
                         "本轮该点未发现可抓目标，继续下一个抓取点。",
                         flush=True,
                     )
-                    try:
-                        scanner.transport(lambda s=station: navigator.assert_at(s))
-                    except Exception as retreat_exc:
-                        raise RuntimeError(
-                            f"{station} 识别结束后机械臂无法安全收回，禁止移动底盘"
-                        ) from retreat_exc
+                    _recover_grasp_station(scanner, rail, navigator, station)
                     continue
 
-                except RuntimeError as exc:
+                except Exception as exc:
                     message = str(exc)
                     is_workspace_outside = (
                         "未通过工作空间检查" in message
@@ -1012,25 +995,15 @@ def run_competition(
                         )
                     )
                     is_motion_safety_reject = "未通过运动安全检查" in message
-                    if not (is_workspace_outside or is_motion_safety_reject):
-                        # 已经发出运动指令后的 SDK 故障仍然必须终止，不能冒险自动恢复。
-                        raise
-
-                    # 能走到工作空间检查，说明已经识别并定位到了物品；
-                    # 因此这一轮不能判定“全部抓完”。
-                    round_detected_object = True
+                    if is_workspace_outside or is_motion_safety_reject:
+                        round_detected_object = True
                     round_unconfirmed.append(station)
                     print(
                         f"[抓取未完成] {station}: {message}；"
-                        "已识别到物品但当前不可抓，保留到下一轮继续识别。",
+                        "尝试复位后跳过本点，保留到下一轮继续识别。",
                         flush=True,
                     )
-                    try:
-                        scanner.transport(lambda s=station: navigator.assert_at(s))
-                    except Exception as retreat_exc:
-                        raise RuntimeError(
-                            f"{station} 抓取安全检查失败后机械臂无法安全收回，禁止移动底盘"
-                        ) from retreat_exc
+                    _recover_grasp_station(scanner, rail, navigator, station)
                     continue
 
                 rail.travel()
@@ -1272,8 +1245,6 @@ def _print_competition_preview(result: dict[str, Any]) -> None:
     print("Preview mode. Competition plan:")
     print(f"START: {result['start']}")
     print("SCAN : " + " -> ".join(result["scan_route"]))
-    for station, camera in result.get("recognition_cameras", {}).items():
-        print(f"  {station}: {camera['role']} / {camera['serial'] or '序列号待填写'}")
     print(f"HOME : {result['home']} (出口内侧，不真正离场)")
     print("GRASP: " + " -> ".join(result["grasp_priority"]))
     print(f"SCORE: {result['score']}")

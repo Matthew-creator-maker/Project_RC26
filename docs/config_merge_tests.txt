@@ -1,0 +1,369 @@
+test_cancel_guard_aborts_device_selection (test_multicamera_recognition.CameraTests.test_cancel_guard_aborts_device_selection) ... ok
+test_old_device_closed_before_new_device_started (test_multicamera_recognition.CameraTests.test_old_device_closed_before_new_device_started) ... [相机切换] 当前为 chest，序列号 chest-123
+[相机切换] 当前为 head，序列号 head-456
+ok
+test_repeated_frame_timestamp_not_counted_twice (test_multicamera_recognition.CameraTests.test_repeated_frame_timestamp_not_counted_twice) ... [相机切换] 当前为 chest，序列号 chest-123
+ok
+test_same_camera_reused_across_two_points (test_multicamera_recognition.CameraTests.test_same_camera_reused_across_two_points) ... [相机切换] 当前为 chest，序列号 chest-123
+ok
+test_start_failure_releases_device (test_multicamera_recognition.CameraTests.test_start_failure_releases_device) ... ok
+test_stop_failure_prevents_starting_next_device (test_multicamera_recognition.CameraTests.test_stop_failure_prevents_starting_next_device) ... [相机切换] 当前为 chest，序列号 chest-123
+ok
+test_warmup_timeout_releases_device (test_multicamera_recognition.CameraTests.test_warmup_timeout_releases_device) ... ok
+test_exit_point_cannot_accidentally_be_recognition_point (test_multicamera_recognition.PhaseTests.test_exit_point_cannot_accidentally_be_recognition_point) ... ok
+test_far_navigation_point_keeps_logical_station_camera_assignment (test_multicamera_recognition.PhaseTests.test_far_navigation_point_keeps_logical_station_camera_assignment) ... [提示] SCAN_ROUTE 最后一点是 LM9，识别结束后将额外导航到 HOME=LM6
+ok
+test_grasp_only_station_can_still_be_retried (test_multicamera_recognition.PhaseTests.test_grasp_only_station_can_still_be_retried) ... [提示] SCAN_ROUTE 最后一点是 LM9，识别结束后将额外导航到 HOME=LM6
+[提示] 抓取优先级包含未在扫描路线出现的点: ['LM3']
+ok
+test_preview_never_constructs_hardware (test_multicamera_recognition.PhaseTests.test_preview_never_constructs_hardware) ... [提示] SCAN_ROUTE 最后一点是 LM9，识别结束后将额外导航到 HOME=LM6
+ok
+test_recognition_only_point_excluded_from_all_grasp_rounds (test_multicamera_recognition.PhaseTests.test_recognition_only_point_excluded_from_all_grasp_rounds) ... [提示] SCAN_ROUTE 最后一点是 LM9，识别结束后将额外导航到 HOME=LM2
+=== Competition Mission Start ===
+[策略] 固定点扫描: ['LM2', 'LM9']
+[策略] 抓取优先级: ['LM2']
+[识别] LM2 / chest: cola
+[播报] 识别到cola
+[识别] LM9 / head: cola
+[识别汇总] 共记录 1 个类别: {'cola': 'LM2'}
+[抓取轮次] 第 1 轮逐点现场识别: ['LM2']
+[抓取现场识别] LM2: 到站，进入识别位姿并搜索目标；扫描阶段提示类别=['cola']
+[抓取未完成] LM2: 目标未通过工作空间检查: outside_workspace_x；已识别到物品但当前不可抓，保留到下一轮继续识别。
+[抓取循环] 第 1 轮结束：本轮识别到过物品，未确认点=['LM2']。继续下一轮，仅检查尚未成功抓取的点；已完成点=[]。
+[抓取循环] 第 2 轮仅检查未完成点: ['LM2']；已完成点=[]
+[抓取现场识别] LM2: 到站，进入识别位姿并搜索目标；扫描阶段提示类别=['cola']
+[得分区] 已完成第 1 件: cola@LM2；LM2 标记为已完成，后续循环不再识别/抓取该点。
+[抓取循环] 第 2 轮结束：本轮识别到过物品。继续下一轮，仅检查尚未成功抓取的点；已完成点=['LM2']。
+[抓取循环] 第 3 轮仅检查未完成点: []；已完成点=['LM2']
+[任务完成] 所有抓取点都已成功抓取并送至 LM7，后续不再重复识别这些点。
+=== Mission Finished: exited via LM8 ===
+ok
+test_count_same_class_only_once_per_frame (test_multicamera_recognition.RecognitionTests.test_count_same_class_only_once_per_frame) ... ok
+test_detection_disappearance_resets_confirmation (test_multicamera_recognition.RecognitionTests.test_detection_disappearance_resets_confirmation) ... ok
+test_grasp_camera_starts_only_after_recognition_device_stopped (test_multicamera_recognition.RecognitionTests.test_grasp_camera_starts_only_after_recognition_device_stopped) ... ok
+test_live_cancel_releases_camera_in_callers_finally (test_multicamera_recognition.RecognitionTests.test_live_cancel_releases_camera_in_callers_finally) ... ok
+test_live_window_receives_station_and_camera (test_multicamera_recognition.RecognitionTests.test_live_window_receives_station_and_camera) ... [识别] LM9 / head: cola
+ok
+test_no_frames_is_hardware_error_not_empty_scene (test_multicamera_recognition.RecognitionTests.test_no_frames_is_hardware_error_not_empty_scene) ... ok
+test_no_gui_calls_when_display_disabled (test_multicamera_recognition.RecognitionTests.test_no_gui_calls_when_display_disabled) ... [识别] LM2 / chest: cola
+ok
+test_rgb_recognition_works_with_no_valid_depth (test_multicamera_recognition.RecognitionTests.test_rgb_recognition_works_with_no_valid_depth) ... [识别] LM9 / head: cola
+ok
+test_scan_never_calls_grasp_pipeline_or_arm (test_multicamera_recognition.RecognitionTests.test_scan_never_calls_grasp_pipeline_or_arm) ... [识别] LM9 / head: cola
+ok
+test_station_change_does_not_reuse_stability (test_multicamera_recognition.RecognitionTests.test_station_change_does_not_reuse_stability) ... [识别] LM2 / chest: cola
+[识别] LM9 / head: 未发现稳定类别
+ok
+test_arm_camera_cannot_be_used_as_chest (test_multicamera_recognition.SettingsTests.test_arm_camera_cannot_be_used_as_chest) ... ok
+test_bad_camera_config_rejected_before_loading_grasp_or_model (test_multicamera_recognition.SettingsTests.test_bad_camera_config_rejected_before_loading_grasp_or_model) ... ok
+test_cli_can_override_default_live_display (test_multicamera_recognition.SettingsTests.test_cli_can_override_default_live_display) ... ok
+test_duplicate_in_single_container_rejected (test_multicamera_recognition.SettingsTests.test_duplicate_in_single_container_rejected) ... ok
+test_gui_is_checked_before_motion_on_linux (test_multicamera_recognition.SettingsTests.test_gui_is_checked_before_motion_on_linux) ... ok
+test_invalid_boolean_and_nonfinite_parameters_rejected (test_multicamera_recognition.SettingsTests.test_invalid_boolean_and_nonfinite_parameters_rejected) ... ok
+test_missing_head_serial_checked_before_arrival (test_multicamera_recognition.SettingsTests.test_missing_head_serial_checked_before_arrival) ... ok
+test_same_serial_for_two_roles_rejected (test_multicamera_recognition.SettingsTests.test_same_serial_for_two_roles_rejected) ... ok
+test_station_in_two_containers_rejected (test_multicamera_recognition.SettingsTests.test_station_in_two_containers_rejected) ... ok
+test_two_containers_choose_expected_camera (test_multicamera_recognition.SettingsTests.test_two_containers_choose_expected_camera) ... ok
+test_unknown_station_does_not_fall_back_to_random_camera (test_multicamera_recognition.SettingsTests.test_unknown_station_does_not_fall_back_to_random_camera) ... ok
+test_q_key_raises_cancel_instead_of_entering_grasp (test_multicamera_recognition.WindowTests.test_q_key_raises_cancel_instead_of_entering_grasp) ... ok
+test_s_key_saves_image_and_matching_camera_metadata (test_multicamera_recognition.WindowTests.test_s_key_saves_image_and_matching_camera_metadata) ... [截图] C:\Users\Matthew\AppData\Local\Temp\tmpc9u3f7cs\20261002_152557_281679_head.jpg
+ok
+test_every_station_is_recognized_even_when_scan_record_is_empty (test_competition_retry_queue.RetryQueueTests.test_every_station_is_recognized_even_when_scan_record_is_empty) ... === Competition Mission Start ===
+[策略] 固定点扫描: ['LM2', 'LM3', 'LM4', 'LM5', 'LM6']
+[策略] 抓取优先级: ['LM6', 'LM5', 'LM4', 'LM3', 'LM2']
+[播报] 识别到Obj5
+[识别汇总] 共记录 1 个类别: {'Obj5': 'LM5'}
+[抓取轮次] 第 1 轮逐点现场识别: ['LM6', 'LM5', 'LM4', 'LM3', 'LM2']
+[抓取现场识别] LM6: 到站，进入识别位姿并搜索目标；扫描阶段无记录，本次仍执行现场识别
+[抓取现场识别] LM6: LM6 no stable target；本轮该点未发现可抓目标，继续下一个抓取点。
+[抓取现场识别] LM5: 到站，进入识别位姿并搜索目标；扫描阶段提示类别=['Obj5']
+[得分区] 已完成第 1 件: Obj5@LM5；LM5 标记为已完成，后续循环不再识别/抓取该点。
+[抓取现场识别] LM4: 到站，进入识别位姿并搜索目标；扫描阶段无记录，本次仍执行现场识别
+[抓取现场识别] LM4: LM4 no stable target；本轮该点未发现可抓目标，继续下一个抓取点。
+[抓取现场识别] LM3: 到站，进入识别位姿并搜索目标；扫描阶段无记录，本次仍执行现场识别
+[抓取现场识别] LM3: LM3 no stable target；本轮该点未发现可抓目标，继续下一个抓取点。
+[抓取现场识别] LM2: 到站，进入识别位姿并搜索目标；扫描阶段无记录，本次仍执行现场识别
+[抓取现场识别] LM2: LM2 no stable target；本轮该点未发现可抓目标，继续下一个抓取点。
+[抓取循环] 第 1 轮结束：本轮识别到过物品。继续下一轮，仅检查尚未成功抓取的点；已完成点=['LM5']。
+[抓取循环] 第 2 轮仅检查未完成点: ['LM2', 'LM3', 'LM4', 'LM6']；已完成点=['LM5']
+[抓取现场识别] LM2: 到站，进入识别位姿并搜索目标；扫描阶段无记录，本次仍执行现场识别
+[抓取现场识别] LM2: LM2 no stable target；本轮该点未发现可抓目标，继续下一个抓取点。
+[抓取现场识别] LM3: 到站，进入识别位姿并搜索目标；扫描阶段无记录，本次仍执行现场识别
+[抓取现场识别] LM3: LM3 no stable target；本轮该点未发现可抓目标，继续下一个抓取点。
+[抓取现场识别] LM4: 到站，进入识别位姿并搜索目标；扫描阶段无记录，本次仍执行现场识别
+[抓取现场识别] LM4: LM4 no stable target；本轮该点未发现可抓目标，继续下一个抓取点。
+[抓取现场识别] LM6: 到站，进入识别位姿并搜索目标；扫描阶段无记录，本次仍执行现场识别
+[抓取现场识别] LM6: LM6 no stable target；本轮该点未发现可抓目标，继续下一个抓取点。
+[任务完成] LM2~LM6 已完整巡检一轮，所有抓取点均未再识别到可抓目标，判定物品已全部抓取完。
+=== Mission Finished: exited via LM8 ===
+ok
+test_full_empty_round_finishes_without_waiting_for_time_limit (test_competition_retry_queue.RetryQueueTests.test_full_empty_round_finishes_without_waiting_for_time_limit) ... === Competition Mission Start ===
+[策略] 固定点扫描: ['LM2', 'LM3', 'LM4', 'LM5', 'LM6']
+[策略] 抓取优先级: ['LM6', 'LM5', 'LM4', 'LM3', 'LM2']
+[识别汇总] 共记录 0 个类别: {}
+[抓取轮次] 第 1 轮逐点现场识别: ['LM6', 'LM5', 'LM4', 'LM3', 'LM2']
+[抓取现场识别] LM6: 到站，进入识别位姿并搜索目标；扫描阶段无记录，本次仍执行现场识别
+[抓取现场识别] LM6: LM6 no stable target；本轮该点未发现可抓目标，继续下一个抓取点。
+[抓取现场识别] LM5: 到站，进入识别位姿并搜索目标；扫描阶段无记录，本次仍执行现场识别
+[抓取现场识别] LM5: LM5 no stable target；本轮该点未发现可抓目标，继续下一个抓取点。
+[抓取现场识别] LM4: 到站，进入识别位姿并搜索目标；扫描阶段无记录，本次仍执行现场识别
+[抓取现场识别] LM4: LM4 no stable target；本轮该点未发现可抓目标，继续下一个抓取点。
+[抓取现场识别] LM3: 到站，进入识别位姿并搜索目标；扫描阶段无记录，本次仍执行现场识别
+[抓取现场识别] LM3: LM3 no stable target；本轮该点未发现可抓目标，继续下一个抓取点。
+[抓取现场识别] LM2: 到站，进入识别位姿并搜索目标；扫描阶段无记录，本次仍执行现场识别
+[抓取现场识别] LM2: LM2 no stable target；本轮该点未发现可抓目标，继续下一个抓取点。
+[任务完成] LM2~LM6 已完整巡检一轮，所有抓取点均未再识别到可抓目标，判定物品已全部抓取完。
+=== Mission Finished: exited via LM8 ===
+ok
+test_grasp_sdk_runtime_error_aborts_before_next_station (test_competition_retry_queue.RetryQueueTests.test_grasp_sdk_runtime_error_aborts_before_next_station) ... === Competition Mission Start ===
+[策略] 固定点扫描: ['LM2', 'LM3', 'LM4', 'LM5', 'LM6']
+[策略] 抓取优先级: ['LM6', 'LM5', 'LM4', 'LM3', 'LM2']
+[识别汇总] 共记录 0 个类别: {}
+[抓取轮次] 第 1 轮逐点现场识别: ['LM6', 'LM5', 'LM4', 'LM3', 'LM2']
+[抓取现场识别] LM6: 到站，进入识别位姿并搜索目标；扫描阶段无记录，本次仍执行现场识别
+ok
+test_object_missed_during_scan_can_be_found_and_grasped (test_competition_retry_queue.RetryQueueTests.test_object_missed_during_scan_can_be_found_and_grasped) ... === Competition Mission Start ===
+[策略] 固定点扫描: ['LM2', 'LM3', 'LM4', 'LM5', 'LM6']
+[策略] 抓取优先级: ['LM6', 'LM5', 'LM4', 'LM3', 'LM2']
+[识别汇总] 共记录 0 个类别: {}
+[抓取轮次] 第 1 轮逐点现场识别: ['LM6', 'LM5', 'LM4', 'LM3', 'LM2']
+[抓取现场识别] LM6: 到站，进入识别位姿并搜索目标；扫描阶段无记录，本次仍执行现场识别
+[抓取现场识别] LM6: LM6 no stable target；本轮该点未发现可抓目标，继续下一个抓取点。
+[抓取现场识别] LM5: 到站，进入识别位姿并搜索目标；扫描阶段无记录，本次仍执行现场识别
+[抓取现场识别] LM5: LM5 no stable target；本轮该点未发现可抓目标，继续下一个抓取点。
+[抓取现场识别] LM4: 到站，进入识别位姿并搜索目标；扫描阶段无记录，本次仍执行现场识别
+[抓取现场识别] LM4: LM4 no stable target；本轮该点未发现可抓目标，继续下一个抓取点。
+[抓取现场识别] LM3: 到站，进入识别位姿并搜索目标；扫描阶段无记录，本次仍执行现场识别
+[得分区] 已完成第 1 件: LateObj@LM3；LM3 标记为已完成，后续循环不再识别/抓取该点。
+[抓取现场识别] LM2: 到站，进入识别位姿并搜索目标；扫描阶段无记录，本次仍执行现场识别
+[抓取现场识别] LM2: LM2 no stable target；本轮该点未发现可抓目标，继续下一个抓取点。
+[抓取循环] 第 1 轮结束：本轮识别到过物品。继续下一轮，仅检查尚未成功抓取的点；已完成点=['LM3']。
+[抓取循环] 第 2 轮仅检查未完成点: ['LM2', 'LM4', 'LM5', 'LM6']；已完成点=['LM3']
+[抓取现场识别] LM2: 到站，进入识别位姿并搜索目标；扫描阶段无记录，本次仍执行现场识别
+[抓取现场识别] LM2: LM2 no stable target；本轮该点未发现可抓目标，继续下一个抓取点。
+[抓取现场识别] LM4: 到站，进入识别位姿并搜索目标；扫描阶段无记录，本次仍执行现场识别
+[抓取现场识别] LM4: LM4 no stable target；本轮该点未发现可抓目标，继续下一个抓取点。
+[抓取现场识别] LM5: 到站，进入识别位姿并搜索目标；扫描阶段无记录，本次仍执行现场识别
+[抓取现场识别] LM5: LM5 no stable target；本轮该点未发现可抓目标，继续下一个抓取点。
+[抓取现场识别] LM6: 到站，进入识别位姿并搜索目标；扫描阶段无记录，本次仍执行现场识别
+[抓取现场识别] LM6: LM6 no stable target；本轮该点未发现可抓目标，继续下一个抓取点。
+[任务完成] LM2~LM6 已完整巡检一轮，所有抓取点均未再识别到可抓目标，判定物品已全部抓取完。
+=== Mission Finished: exited via LM8 ===
+ok
+test_retreat_failure_prevents_navigation (test_competition_retry_queue.RetryQueueTests.test_retreat_failure_prevents_navigation) ... === Competition Mission Start ===
+[策略] 固定点扫描: ['LM2', 'LM3', 'LM4', 'LM5', 'LM6']
+[策略] 抓取优先级: ['LM6', 'LM5', 'LM4', 'LM3', 'LM2']
+[识别汇总] 共记录 0 个类别: {}
+[抓取轮次] 第 1 轮逐点现场识别: ['LM6', 'LM5', 'LM4', 'LM3', 'LM2']
+[抓取现场识别] LM6: 到站，进入识别位姿并搜索目标；扫描阶段无记录，本次仍执行现场识别
+[抓取现场识别] LM6: LM6 no stable target；本轮该点未发现可抓目标，继续下一个抓取点。
+ok
+test_scan_uses_far_station_and_grasp_uses_task_station (test_competition_retry_queue.RetryQueueTests.test_scan_uses_far_station_and_grasp_uses_task_station) ... === Competition Mission Start ===
+[策略] 固定点扫描: ['LM2', 'LM3', 'LM4', 'LM5', 'LM6']
+[策略] 抓取优先级: ['LM6', 'LM5', 'LM4', 'LM3', 'LM2']
+[扫描] LM5 的播报观察点为 LM15
+[识别汇总] 共记录 0 个类别: {}
+[抓取轮次] 第 1 轮逐点现场识别: ['LM6', 'LM5', 'LM4', 'LM3', 'LM2']
+[抓取现场识别] LM6: 到站，进入识别位姿并搜索目标；扫描阶段无记录，本次仍执行现场识别
+[抓取现场识别] LM6: LM6 no stable target；本轮该点未发现可抓目标，继续下一个抓取点。
+[抓取现场识别] LM5: 到站，进入识别位姿并搜索目标；扫描阶段无记录，本次仍执行现场识别
+[抓取现场识别] LM5: LM5 no stable target；本轮该点未发现可抓目标，继续下一个抓取点。
+[抓取现场识别] LM4: 到站，进入识别位姿并搜索目标；扫描阶段无记录，本次仍执行现场识别
+[抓取现场识别] LM4: LM4 no stable target；本轮该点未发现可抓目标，继续下一个抓取点。
+[抓取现场识别] LM3: 到站，进入识别位姿并搜索目标；扫描阶段无记录，本次仍执行现场识别
+[抓取现场识别] LM3: LM3 no stable target；本轮该点未发现可抓目标，继续下一个抓取点。
+[抓取现场识别] LM2: 到站，进入识别位姿并搜索目标；扫描阶段无记录，本次仍执行现场识别
+[抓取现场识别] LM2: LM2 no stable target；本轮该点未发现可抓目标，继续下一个抓取点。
+[任务完成] LM2~LM6 已完整巡检一轮，所有抓取点均未再识别到可抓目标，判定物品已全部抓取完。
+=== Mission Finished: exited via LM8 ===
+ok
+test_success_goes_to_lm7_then_continues_next_station (test_competition_retry_queue.RetryQueueTests.test_success_goes_to_lm7_then_continues_next_station) ... === Competition Mission Start ===
+[策略] 固定点扫描: ['LM2', 'LM3', 'LM4', 'LM5', 'LM6']
+[策略] 抓取优先级: ['LM6', 'LM5', 'LM4', 'LM3', 'LM2']
+[识别汇总] 共记录 0 个类别: {}
+[抓取轮次] 第 1 轮逐点现场识别: ['LM6', 'LM5', 'LM4', 'LM3', 'LM2']
+[抓取现场识别] LM6: 到站，进入识别位姿并搜索目标；扫描阶段无记录，本次仍执行现场识别
+[得分区] 已完成第 1 件: Obj6@LM6；LM6 标记为已完成，后续循环不再识别/抓取该点。
+[抓取现场识别] LM5: 到站，进入识别位姿并搜索目标；扫描阶段无记录，本次仍执行现场识别
+[抓取现场识别] LM5: LM5 no stable target；本轮该点未发现可抓目标，继续下一个抓取点。
+[抓取现场识别] LM4: 到站，进入识别位姿并搜索目标；扫描阶段无记录，本次仍执行现场识别
+[抓取现场识别] LM4: LM4 no stable target；本轮该点未发现可抓目标，继续下一个抓取点。
+[抓取现场识别] LM3: 到站，进入识别位姿并搜索目标；扫描阶段无记录，本次仍执行现场识别
+[抓取现场识别] LM3: LM3 no stable target；本轮该点未发现可抓目标，继续下一个抓取点。
+[抓取现场识别] LM2: 到站，进入识别位姿并搜索目标；扫描阶段无记录，本次仍执行现场识别
+[抓取现场识别] LM2: LM2 no stable target；本轮该点未发现可抓目标，继续下一个抓取点。
+[抓取循环] 第 1 轮结束：本轮识别到过物品。继续下一轮，仅检查尚未成功抓取的点；已完成点=['LM6']。
+[抓取循环] 第 2 轮仅检查未完成点: ['LM2', 'LM3', 'LM4', 'LM5']；已完成点=['LM6']
+[抓取现场识别] LM2: 到站，进入识别位姿并搜索目标；扫描阶段无记录，本次仍执行现场识别
+[抓取现场识别] LM2: LM2 no stable target；本轮该点未发现可抓目标，继续下一个抓取点。
+[抓取现场识别] LM3: 到站，进入识别位姿并搜索目标；扫描阶段无记录，本次仍执行现场识别
+[抓取现场识别] LM3: LM3 no stable target；本轮该点未发现可抓目标，继续下一个抓取点。
+[抓取现场识别] LM4: 到站，进入识别位姿并搜索目标；扫描阶段无记录，本次仍执行现场识别
+[抓取现场识别] LM4: LM4 no stable target；本轮该点未发现可抓目标，继续下一个抓取点。
+[抓取现场识别] LM5: 到站，进入识别位姿并搜索目标；扫描阶段无记录，本次仍执行现场识别
+[抓取现场识别] LM5: LM5 no stable target；本轮该点未发现可抓目标，继续下一个抓取点。
+[任务完成] LM2~LM6 已完整巡检一轮，所有抓取点均未再识别到可抓目标，判定物品已全部抓取完。
+=== Mission Finished: exited via LM8 ===
+ok
+test_time_limit_stops_new_recognition_and_exits (test_competition_retry_queue.RetryQueueTests.test_time_limit_stops_new_recognition_and_exits) ... === Competition Mission Start ===
+[策略] 固定点扫描: ['LM2', 'LM3', 'LM4', 'LM5', 'LM6']
+[策略] 抓取优先级: ['LM6', 'LM5', 'LM4', 'LM3', 'LM2']
+[识别汇总] 共记录 0 个类别: {}
+[抓取轮次] 第 1 轮逐点现场识别: ['LM6', 'LM5', 'LM4', 'LM3', 'LM2']
+[抓取现场识别] LM6: 到站，进入识别位姿并搜索目标；扫描阶段无记录，本次仍执行现场识别
+[抓取现场识别] LM6: LM6 no stable target；本轮该点未发现可抓目标，继续下一个抓取点。
+[时间] 已达到 8 分钟任务上限，停止新增抓取。
+[任务结束] 8 分钟到时，停止继续识别抓取。最后一轮未确认点位: []
+=== Mission Finished: exited via LM8 ===
+ok
+test_empty_expected_labels_allows_live_recognition (test_competition_retry_queue.ScannerTargetTests.test_empty_expected_labels_allows_live_recognition) ... ok
+test_scanner_ignores_unrecorded_higher_confidence_target (test_competition_retry_queue.ScannerTargetTests.test_scanner_ignores_unrecorded_higher_confidence_target) ... [抓取单次识别] LM5: 进入识别点 1。
+[抓取锁定] LM5: Cola (confidence=0.550)；开始收集 1 个稳定点，采样窗口 1.0s。
+[抓取采样] Cola@LM5: 1/1, xyz=[0.1, 0.2, 0.3] m, YOLO平均=0.00s/帧
+[抓取采样完成] Cola@LM5: 1/1, 中值=[0.1, 0.2, 0.3] m, 处理帧=1, YOLO平均=0.00s/帧
+ok
+test_empty_full_closure_is_not_a_grasp_even_if_sdk_returns_success (test_gripper_ack.GripperAckTests.test_empty_full_closure_is_not_a_grasp_even_if_sdk_returns_success) ... [夹爪确认] SDK=0，状态读取=0，状态={'enable_state': 1, 'status': 1, 'error': 0, 'mode': 2, 'actpos': 412}
+ok
+test_force_stop_after_ambiguous_sdk_result_needs_no_opening_range (test_gripper_ack.GripperAckTests.test_force_stop_after_ambiguous_sdk_result_needs_no_opening_range) ... [夹爪确认] SDK=-4，状态读取=0，状态={'enable_state': 1, 'status': 1, 'error': 0, 'mode': 6, 'actpos': 412}
+[夹爪确认] 夹爪因力控接触停止。
+ok
+test_force_stop_after_successful_sdk_result (test_gripper_ack.GripperAckTests.test_force_stop_after_successful_sdk_result) ... [夹爪确认] SDK=0，状态读取=0，状态={'enable_state': 1, 'status': 1, 'error': 0, 'mode': 6, 'actpos': 412}
+[夹爪确认] 夹爪因力控接触停止。
+ok
+test_offline_and_gripper_fault_cannot_be_acknowledged (test_gripper_ack.GripperAckTests.test_offline_and_gripper_fault_cannot_be_acknowledged) ... [夹爪确认] SDK=-4，状态读取=0，状态={'enable_state': 1, 'status': 0, 'error': 0, 'mode': 6, 'actpos': 412}
+[夹爪确认] SDK=-4，状态读取=0，状态={'enable_state': 1, 'status': 1, 'error': 1, 'mode': 6, 'actpos': 412}
+ok
+test_other_sdk_errors_remain_failures (test_gripper_ack.GripperAckTests.test_other_sdk_errors_remain_failures) ... ok
+test_still_closing_must_not_withdraw (test_gripper_ack.GripperAckTests.test_still_closing_must_not_withdraw) ... [夹爪确认] SDK=-4，状态读取=0，状态={'enable_state': 1, 'status': 1, 'error': 0, 'mode': 4, 'actpos': 412}
+ok
+test_transition_from_closing_to_force_stop (test_gripper_ack.GripperAckTests.test_transition_from_closing_to_force_stop) ... [夹爪确认] SDK=-4，状态读取=0，状态={'enable_state': 1, 'status': 1, 'error': 0, 'mode': 4, 'actpos': 412}
+[夹爪确认] SDK=-4，状态读取=0，状态={'enable_state': 1, 'status': 1, 'error': 0, 'mode': 6, 'actpos': 412}
+[夹爪确认] 夹爪因力控接触停止。
+ok
+test_action_failure_does_not_continue_to_later_navigation (test_task.TaskTests.test_action_failure_does_not_continue_to_later_navigation) ... [导航] 保留底盘原生避障；程序不做绕路，只在持续阻塞后回退上一任务点
+=== LM1-LM7 Legacy Mission Start ===
+[导航] LM1 -> LM2，task_status=2
+[导航] LM1 -> LM2，task_status=4
+[到站] LM2，连续 3 个新状态帧确认静止
+[导航] LM2 -> LM3，task_status=2
+[导航] LM2 -> LM3，task_status=4
+[到站] LM3，连续 3 个新状态帧确认静止
+ok
+test_common_navigation_failures_abort (test_task.TaskTests.test_common_navigation_failures_abort) ... [导航] 保留底盘原生避障；程序不做绕路，只在持续阻塞后回退上一任务点
+=== LM1-LM7 Legacy Mission Start ===
+[取消] 底盘已确认取消请求；请核对实际停止状态
+[导航] 保留底盘原生避障；程序不做绕路，只在持续阻塞后回退上一任务点
+=== LM1-LM7 Legacy Mission Start ===
+[导航] LM1 -> LM2，task_status=2
+[取消] 底盘已确认取消请求；请核对实际停止状态
+[导航] 保留底盘原生避障；程序不做绕路，只在持续阻塞后回退上一任务点
+=== LM1-LM7 Legacy Mission Start ===
+[导航] LM1 -> LM2，task_status=2
+[导航] LM1 -> LM2，task_status=4
+[取消] 底盘已确认取消请求；请核对实际停止状态
+[导航] 保留底盘原生避障；程序不做绕路，只在持续阻塞后回退上一任务点
+=== LM1-LM7 Legacy Mission Start ===
+[取消] 底盘已确认取消请求；请核对实际停止状态
+[导航] 保留底盘原生避障；程序不做绕路，只在持续阻塞后回退上一任务点
+=== LM1-LM7 Legacy Mission Start ===
+[取消] 底盘已确认取消请求；请核对实际停止状态
+[导航] 保留底盘原生避障；程序不做绕路，只在持续阻塞后回退上一任务点
+=== LM1-LM7 Legacy Mission Start ===
+[取消] 底盘已确认取消请求；请核对实际停止状态
+[导航] 保留底盘原生避障；程序不做绕路，只在持续阻塞后回退上一任务点
+=== LM1-LM7 Legacy Mission Start ===
+[导航] LM1 -> LM2，task_status=2
+[阻塞回退] 持续阻塞，取消当前导航并返回上一任务点 LM1
+[取消] 底盘已确认取消请求；请核对实际停止状态
+[阻塞回退] 当前 -> LM1，task_status=2
+[阻塞回退] 当前 -> LM1，task_status=4
+[取消] 底盘已确认取消请求；请核对实际停止状态
+ok
+test_complete_route_and_action_order (test_task.TaskTests.test_complete_route_and_action_order) ... [导航] 保留底盘原生避障；程序不做绕路，只在持续阻塞后回退上一任务点
+=== LM1-LM7 Legacy Mission Start ===
+[导航] LM1 -> LM2，task_status=2
+[导航] LM1 -> LM2，task_status=4
+[到站] LM2，连续 3 个新状态帧确认静止
+[导航] LM2 -> LM3，task_status=2
+[导航] LM2 -> LM3，task_status=4
+[到站] LM3，连续 3 个新状态帧确认静止
+[导航] LM3 -> LM4，task_status=2
+[导航] LM3 -> LM4，task_status=4
+[到站] LM4，连续 3 个新状态帧确认静止
+[导航] LM4 -> LM5，task_status=2
+[导航] LM4 -> LM5，task_status=4
+[到站] LM5，连续 3 个新状态帧确认静止
+[导航] LM5 -> LM6，task_status=2
+[导航] LM5 -> LM6，task_status=4
+[到站] LM6，连续 3 个新状态帧确认静止
+[导航] LM6 -> LM7，task_status=2
+[导航] LM6 -> LM7，task_status=4
+[到站] LM7，连续 3 个新状态帧确认静止
+ok
+test_config_paths_are_resolved_from_task_file (test_task.TaskTests.test_config_paths_are_resolved_from_task_file) ... ok
+test_dynamic_block_returns_to_previous_task_point (test_task.TaskTests.test_dynamic_block_returns_to_previous_task_point) ... [导航] 保留底盘原生避障；程序不做绕路，只在持续阻塞后回退上一任务点
+[导航] LM1 -> LM2，task_status=2
+[阻塞回退] 持续阻塞，取消当前导航并返回上一任务点 LM1
+[取消] 底盘已确认取消请求；请核对实际停止状态
+[阻塞回退] 当前 -> LM1，task_status=2
+[阻塞回退] 当前 -> LM1，task_status=4
+[阻塞回退] 已返回上一任务点 LM1，连续 3 个新状态帧确认静止
+ok
+test_full_task_requires_calibration_confirmation_before_factories (test_task.TaskTests.test_full_task_requires_calibration_confirmation_before_factories) ... ok
+test_navigation_failure_never_runs_arm_station_action_and_cancels (test_task.TaskTests.test_navigation_failure_never_runs_arm_station_action_and_cancels) ... [导航] 保留底盘原生避障；程序不做绕路，只在持续阻塞后回退上一任务点
+=== LM1-LM7 Legacy Mission Start ===
+[导航] LM1 -> LM2，task_status=2
+[导航] LM1 -> LM2，task_status=5
+[取消] 底盘已确认取消请求；请核对实际停止状态
+ok
+test_navigation_only_goes_all_the_way_to_lm7_without_grasp_programs (test_task.TaskTests.test_navigation_only_goes_all_the_way_to_lm7_without_grasp_programs) ... [导航] 保留底盘原生避障；程序不做绕路，只在持续阻塞后回退上一任务点
+=== LM1-LM7 Legacy Mission Start ===
+[导航] LM1 -> LM2，task_status=2
+[导航] LM1 -> LM2，task_status=4
+[到站] LM2，连续 3 个新状态帧确认静止
+[导航] LM2 -> LM3，task_status=2
+[导航] LM2 -> LM3，task_status=4
+[到站] LM3，连续 3 个新状态帧确认静止
+[导航] LM3 -> LM4，task_status=2
+[导航] LM3 -> LM4，task_status=4
+[到站] LM4，连续 3 个新状态帧确认静止
+[导航] LM4 -> LM5，task_status=2
+[导航] LM4 -> LM5，task_status=4
+[到站] LM5，连续 3 个新状态帧确认静止
+[导航] LM5 -> LM6，task_status=2
+[导航] LM5 -> LM6，task_status=4
+[到站] LM6，连续 3 个新状态帧确认静止
+[导航] LM6 -> LM7，task_status=2
+[导航] LM6 -> LM7，task_status=4
+[到站] LM7，连续 3 个新状态帧确认静止
+ok
+test_preview_has_exact_competition_route_without_hardware (test_task.TaskTests.test_preview_has_exact_competition_route_without_hardware) ... ok
+test_reject_bad_route_or_action (test_task.TaskTests.test_reject_bad_route_or_action) ... ok
+test_reject_incomplete_and_string_status (test_task.TaskTests.test_reject_incomplete_and_string_status) ... ok
+test_wrong_start_stops_before_navigation (test_task.TaskTests.test_wrong_start_stops_before_navigation) ... [导航] 保留底盘原生避障；程序不做绕路，只在持续阻塞后回退上一任务点
+ok
+test_current_settings_keep_latest_route_and_six_second_scan (test_latest_multicamera_merge.TeammateMergeTests.test_current_settings_keep_latest_route_and_six_second_scan) ... ok
+test_transport_before_navigation_and_real_labels_announced_once (test_latest_multicamera_merge.TeammateMergeTests.test_transport_before_navigation_and_real_labels_announced_once) ... === Competition Mission Start ===
+[策略] 固定点扫描: ['LM2', 'LM3', 'LM4', 'LM5', 'LM6']
+[策略] 抓取优先级: ['LM6', 'LM5', 'LM4', 'LM3', 'LM2']
+[播报] 识别到cola
+[识别汇总] 共记录 1 个类别: {'cola': 'LM2'}
+[抓取轮次] 第 1 轮逐点现场识别: ['LM6', 'LM5', 'LM4', 'LM3', 'LM2']
+[抓取现场识别] LM6: 到站，进入识别位姿并搜索目标；扫描阶段无记录，本次仍执行现场识别
+[抓取现场识别] LM6: 本点没有可抓取物品；本轮该点未发现可抓目标，继续下一个抓取点。
+[抓取现场识别] LM5: 到站，进入识别位姿并搜索目标；扫描阶段无记录，本次仍执行现场识别
+[抓取现场识别] LM5: 本点没有可抓取物品；本轮该点未发现可抓目标，继续下一个抓取点。
+[抓取现场识别] LM4: 到站，进入识别位姿并搜索目标；扫描阶段无记录，本次仍执行现场识别
+[抓取现场识别] LM4: 本点没有可抓取物品；本轮该点未发现可抓目标，继续下一个抓取点。
+[抓取现场识别] LM3: 到站，进入识别位姿并搜索目标；扫描阶段无记录，本次仍执行现场识别
+[抓取现场识别] LM3: 本点没有可抓取物品；本轮该点未发现可抓目标，继续下一个抓取点。
+[抓取现场识别] LM2: 到站，进入识别位姿并搜索目标；扫描阶段提示类别=['cola']
+[抓取现场识别] LM2: 本点没有可抓取物品；本轮该点未发现可抓目标，继续下一个抓取点。
+[任务完成] LM2~LM6 已完整巡检一轮，所有抓取点均未再识别到可抓目标，判定物品已全部抓取完。
+=== Mission Finished: exited via LM8 ===
+ok
+
+----------------------------------------------------------------------
+Ran 66 tests in 6.864s
+
+OK
