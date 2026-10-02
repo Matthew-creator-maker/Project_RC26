@@ -10,7 +10,7 @@ camera:
 
 model:
   # 路径相对于本 config.yaml 所在目录，支持 Ubuntu。
-  weights: "../assets/models/classes_12new.pt"
+  weights: "../assets/models/RoboCup923.pt"
   confidence: 0.5
   iou: 0.45
   device: "cpu"
@@ -156,7 +156,7 @@ height_profiles:
     grasp_orientation_rad: [1.514, 0.152, -0.070]
     final_tool_offset_m: [0.0, 0.0, 0.04]
     transition_tool_offset_m: [0.0, 0.0, -0.10]
-
+S
   shelf_1_2m:
     # 【LM点分配】属于 1.2m 高层的 LM 点填在这里。
     stations: []

@@ -26,7 +26,7 @@
   "task": {
     "start_station": "LM1",
     "end_station": "LM7",
-    "target": "Cola"
+    "target": "cola"
   },
   "route": [
     "LM1",
@@ -38,11 +38,11 @@
     "LM7"
   ],
   "task_lm3": {
-    "target": "Cola",
+    "target": "cola",
     "action": "release"
   },
   "task_lm5": {
-    "target": "Cola",
+    "target": "cola",
     "action": "carry"
   },
   "task_lm7": {
