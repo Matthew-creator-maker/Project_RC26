@@ -60,7 +60,7 @@ SCAN_ROUTE = ["LM2", "LM3", "LM4", "LM5", "LM6"]
 # 播报阶段单独使用的导航点：键是物品所属任务点，值是较远的播报观察点。
 # 例如在 RoboShop 中新增远处 LM15 后，改为 {"LM5": "LM15"}。
 # 未配置的任务点在播报和抓取阶段使用同一个 LM 点。
-SCAN_NAV_STATIONS: dict[str, str] = {}
+SCAN_NAV_STATIONS: dict[str, str] = {"LM6":"LM15"}
 HOME_STATION = "LM6"
 SCORE_STATION = "LM7"
 EXIT_STATION = "LM8"
