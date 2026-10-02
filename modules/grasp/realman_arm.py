@@ -3,6 +3,7 @@
 默认 dry-run，不导入 SDK、不连接硬件。只有 execute=True 时才真实执行。
 """
 
+import ctypes
 import importlib
 import math
 import sys
@@ -159,7 +160,15 @@ class RealManArm:
 
         limit_check = getattr(arm, "rm_algo_ikine_check_joint_position_limit", None)
         if callable(limit_check):
-            exceeded = limit_check(joints)
+            try:
+                # 新版 RealMan Python SDK 按官方接口可直接接收 list[float]。
+                exceeded = limit_check(joints)
+            except ctypes.ArgumentError:
+                # 兼容部分旧版/异常绑定：底层 C 接口要求 const float*，
+                # 但 Python 包装层未自动把 list 转成 LP_c_float。
+                joint_buffer = (ctypes.c_float * 6)(*joints)
+                exceeded = limit_check(joint_buffer)
+
             if exceeded not in (0, -1):
                 raise RuntimeError(
                     f"{name}未通过运动安全检查: IK 解触发厂家关节位置限位，关节={exceeded}"

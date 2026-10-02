@@ -301,10 +301,10 @@ class RetryQueueTests(unittest.TestCase):
         self.assertEqual(result["finish_reason"], "time_limit")
         self.assertEqual(nav.current_station(), "LM8")
 
-    def test_non_workspace_runtime_error_still_aborts(self):
+    def test_grasp_runtime_error_recovers_and_moves_to_next_station(self):
         scanner = FakeScanner(
             grasp_plan={
-                "LM6": [RuntimeError("arm communication failed")],
+                "LM6": [RuntimeError("arm communication failed"), None],
                 "LM5": [None],
                 "LM4": [None],
                 "LM3": [None],
@@ -312,8 +312,30 @@ class RetryQueueTests(unittest.TestCase):
             },
             scan_plan={station: [] for station in main.SCAN_ROUTE},
         )
-        with self.assertRaisesRegex(RuntimeError, "arm communication failed"):
-            self.run_mission(scanner)
+        result, nav = self.run_mission(scanner)
+        self.assertEqual(scanner.grasp_calls[:2], ["LM6", "LM5"])
+        self.assertEqual(nav.current_station(), "LM8")
+        self.assertEqual(result["finish_reason"], "all_objects_cleared")
+
+    def test_recovery_failure_prevents_navigation(self):
+        scanner = FakeScanner(
+            grasp_plan={"LM6": [RuntimeError("arm failed")]},
+            scan_plan={station: [] for station in main.SCAN_ROUTE},
+        )
+        original_transport = scanner.transport
+        def transport(guard):
+            if scanner.grasp_calls:
+                raise RuntimeError("arm cannot return")
+            original_transport(guard)
+        scanner.transport = transport
+        nav = FakeNavigator({})
+        with patch.object(main, "speak_blocking", return_value=True):
+            with self.assertRaisesRegex(RuntimeError, "禁止移动底盘"):
+                main.run_competition(
+                    self.config, make_args(), navigator_factory=lambda _: nav,
+                    scanner_factory=lambda _cfg, _args: scanner, rail_factory=FakeRail,
+                )
+        self.assertNotIn(("LM6", "LM5"), nav.commands)
 
 class ScannerTargetTests(unittest.TestCase):
     def test_empty_expected_labels_allows_live_recognition(self):

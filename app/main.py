@@ -60,14 +60,14 @@ SCAN_ROUTE = ["LM2", "LM3", "LM4", "LM5", "LM6"]
 # 播报阶段单独使用的导航点：键是物品所属任务点，值是较远的播报观察点。
 # 例如在 RoboShop 中新增远处 LM15 后，改为 {"LM5": "LM15"}。
 # 未配置的任务点在播报和抓取阶段使用同一个 LM 点。
-SCAN_NAV_STATIONS: dict[str, str] = {"LM6":"LM15"}
+SCAN_NAV_STATIONS: dict[str, str] = {}
 HOME_STATION = "LM6"
 SCORE_STATION = "LM7"
 EXIT_STATION = "LM8"
 GRASP_PRIORITY = ["LM6", "LM5", "LM4", "LM3", "LM2"]
 
 MATCH_SECONDS = 480.0
-SCAN_SECONDS_PER_STATION = 6.0 #修改识别时间
+SCAN_SECONDS_PER_STATION = 8.0 #修改识别时间
 EXIT_RESERVE_SECONDS = 45.0
 GRASP_REDETECT_TIMEOUT_SECONDS = 8.0
 GRASP_SAMPLE_TIMEOUT_SECONDS = 20.0
@@ -696,6 +696,23 @@ def _prepare_rail_for_station(rail, scanner, station: str) -> None:
         rail.prepare(station)
 
 
+def _recover_grasp_station(scanner, rail, navigator, station: str) -> None:
+    """Only permit chassis motion after both arm and rail are back in travel pose."""
+    guard = lambda: navigator.assert_at(station)
+    try:
+        # An SDK motion failure may leave the arm moving. Stop it before recovery.
+        arm = getattr(scanner, "arm", None)
+        if arm is not None and hasattr(arm, "stop_best_effort"):
+            arm.stop_best_effort()
+        scanner.transport(guard)
+        rail.travel()
+    except Exception as exc:
+        raise RuntimeError(
+            f"{station} 抓取失败后无法确认机械臂和导轨已复位，禁止移动底盘"
+        ) from exc
+    print(f"[抓取恢复] {station}: 机械臂与导轨已回行驶位，继续下一任务点。", flush=True)
+
+
 def run_competition(
     config: dict[str, Any],
     args: argparse.Namespace,
@@ -916,7 +933,6 @@ def run_competition(
                         round_unconfirmed.append(station)
                         continue
 
-                _prepare_rail_for_station(rail, scanner, station)
                 # 每到一个抓取点都必须进入识别位姿并现场识别一次。
                 # 不再因为扫描阶段没有记录到该点而跳过。
                 recorded_labels = labels_by_station.get(station, [])
@@ -939,6 +955,7 @@ def run_competition(
                 )
 
                 try:
+                    _prepare_rail_for_station(rail, scanner, station)
                     # 这里故意传 expected_labels=None：
                     # 抓取阶段必须能发现扫描阶段漏检、位置变化或同类新增的物品。
                     result = scanner.grasp_station_once(
@@ -961,15 +978,10 @@ def run_competition(
                         "本轮该点未发现可抓目标，继续下一个抓取点。",
                         flush=True,
                     )
-                    try:
-                        scanner.transport(lambda s=station: navigator.assert_at(s))
-                    except Exception as retreat_exc:
-                        raise RuntimeError(
-                            f"{station} 识别结束后机械臂无法安全收回，禁止移动底盘"
-                        ) from retreat_exc
+                    _recover_grasp_station(scanner, rail, navigator, station)
                     continue
 
-                except RuntimeError as exc:
+                except Exception as exc:
                     message = str(exc)
                     is_workspace_outside = (
                         "未通过工作空间检查" in message
@@ -983,25 +995,15 @@ def run_competition(
                         )
                     )
                     is_motion_safety_reject = "未通过运动安全检查" in message
-                    if not (is_workspace_outside or is_motion_safety_reject):
-                        # 已经发出运动指令后的 SDK 故障仍然必须终止，不能冒险自动恢复。
-                        raise
-
-                    # 能走到工作空间检查，说明已经识别并定位到了物品；
-                    # 因此这一轮不能判定“全部抓完”。
-                    round_detected_object = True
+                    if is_workspace_outside or is_motion_safety_reject:
+                        round_detected_object = True
                     round_unconfirmed.append(station)
                     print(
                         f"[抓取未完成] {station}: {message}；"
-                        "已识别到物品但当前不可抓，保留到下一轮继续识别。",
+                        "尝试复位后跳过本点，保留到下一轮继续识别。",
                         flush=True,
                     )
-                    try:
-                        scanner.transport(lambda s=station: navigator.assert_at(s))
-                    except Exception as retreat_exc:
-                        raise RuntimeError(
-                            f"{station} 抓取安全检查失败后机械臂无法安全收回，禁止移动底盘"
-                        ) from retreat_exc
+                    _recover_grasp_station(scanner, rail, navigator, station)
                     continue
 
                 rail.travel()
