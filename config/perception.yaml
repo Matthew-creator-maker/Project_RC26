@@ -49,8 +49,8 @@ arm:
   # 第 6 轴原值 -243.399° 与 116.601° 相差整整 360°，末端朝向等效。
   # 运输位第 6 轴为 170°；采用邻近的等效角，避免进出观测位时多转一整圈。
   observation_joints_deg: [5.03, 96.214, 36.861, -130.156, -104.051, 116.601]
-  joint_speed: 10   #原先是5
-  cartesian_speed: 10 #原先是5
+  joint_speed: 20   #原先是5
+  cartesian_speed: 20 #原先是5
   observation_settle_seconds: 1.5
   # RealMan 位姿采用 [x,y,z,rx,ry,rz]；此处旋转按 ZYX 内旋、弧度解释。
   grasp_orientation_rad: [1.514, 0.152, -0.070]
@@ -101,7 +101,7 @@ grasp_test:
 height_profiles:
   ground:
     # 【LM点分配】地面高度的导航识别点；可直接增删 LM。
-    stations: [LM3, LM4]
+    stations: [LM6]
     enabled: true
     nominal_height_m: 0.0
     rail_position_inc: -6000000
@@ -116,8 +116,8 @@ height_profiles:
   table_0_5m:
     # 【LM点分配】示例：真实 0.5m 抓取点若叫 LM20/LM21，就写 [LM20, LM21]。
     # 示例点还要加入 grasp_priority；不要把当前门外离场点 LM8 填进抓取档。
-    stations: []
-    enabled: false  # TODO 实机标定后改 true
+    stations: [LM2,LM3,LM5]
+    enabled: true  # TODO 实机标定后改 true
     nominal_height_m: 0.5
     rail_position_inc: -2250000  # TODO 填 0.5m 高度对应导轨 inc
     observation_points:
