@@ -225,9 +225,9 @@ def _speak_label(label: str, attempts: int = 2) -> bool:
 class CompetitionScanner:
     """比赛感知/抓取控制器。
 
-    阶段 1（识别播报）只保留导航、等待和模拟播报：
-    不启动相机、不连接/移动机械臂、不切换识别位姿。
-    阶段 2（识别抓取）仍按原流程启用机械臂、RealSense 和真实视觉识别。
+    阶段 1（识别播报）开始时机械臂先进入初始/运输位姿；
+    后续只保留导航、等待和模拟播报，不启动相机，也不切换到识别位姿。
+    阶段 2（识别抓取）仍按原流程进入识别位姿、启用 RealSense 和真实视觉识别。
     """
 
     def __init__(self, config: dict[str, Any], args: argparse.Namespace):
@@ -368,7 +368,8 @@ class CompetitionScanner:
     def scan_station(self, station: str, seconds: float, guard) -> list[dict[str, Any]]:
         """阶段 1 的模拟识别。
 
-        保留每个播报点原本的识别等待时间，但不启动摄像头、不连接/移动机械臂，
+        保留每个播报点原本的识别等待时间，但不启动摄像头，
+        机械臂保持阶段开始时设置好的初始/运输位姿，不切换到识别位姿；
         固定模拟返回一个 cola，供上层继续执行语音播报流程。
         """
         if seconds <= 0:
@@ -376,7 +377,7 @@ class CompetitionScanner:
 
         guard()
         print(
-            f"[模拟识别] {station}: 到达播报点；机械臂保持不动、摄像头不启动，"
+            f"[模拟识别] {station}: 到达播报点；机械臂保持初始/运输位姿、摄像头不启动，"
             f"等待 {seconds:.1f} 秒。",
             flush=True,
         )
@@ -770,7 +771,10 @@ def run_competition(
             rail_factory = MissionSlide
         rail = rail_factory()
         scanner = scanner_factory(config, args)
-        # scanner.transport(lambda: navigator.assert_at(plan.start_station))  # 播报阶段初始位姿切换暂时停用
+
+        # 播报阶段开始前，机械臂先进入初始/运输位姿。
+        # 后续 LM2~LM6 模拟识别过程中保持该位姿，不再切换到 observation_pose。
+        scanner.transport(lambda: navigator.assert_at(plan.start_station))
 
         for station in plan.scan_route:
             # 总任务时间到达上限时停止新增动作；后面统一前往 LM8。
