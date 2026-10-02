@@ -153,7 +153,7 @@ height_profiles:
 
   table_0_8m:
     # 【LM点分配】当前沿用旧配置：LM2、LM5、LM6。
-    stations: [LM4]
+    stations: [LM2, LM5, LM6]
     enabled: true
     nominal_height_m: 0.8
     rail_position_inc: 0  # 当前原代码非地面档使用的导轨行驶/上方位置
