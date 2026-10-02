@@ -223,9 +223,11 @@ def _speak_label(label: str, attempts: int = 2) -> bool:
 
 
 class CompetitionScanner:
-    """复用集成后的感知模块，一次扫描当前画面中的全部稳定类别。
+    """比赛感知/抓取控制器。
 
-    感知模块与任务调度保持解耦。底盘到站后：机械臂从运输位到观测位 -> 扫描 -> 回运输位。
+    阶段 1（识别播报）只保留导航、等待和模拟播报：
+    不启动相机、不连接/移动机械臂、不切换识别位姿。
+    阶段 2（识别抓取）仍按原流程启用机械臂、RealSense 和真实视觉识别。
     """
 
     def __init__(self, config: dict[str, Any], args: argparse.Namespace):
@@ -364,60 +366,33 @@ class CompetitionScanner:
             time.sleep(min(0.1, max(0.0, deadline - time.monotonic())))
 
     def scan_station(self, station: str, seconds: float, guard) -> list[dict[str, Any]]:
+        """阶段 1 的模拟识别。
+
+        保留每个播报点原本的识别等待时间，但不启动摄像头、不连接/移动机械臂，
+        固定模拟返回一个 cola，供上层继续执行语音播报流程。
+        """
         if seconds <= 0:
             raise ValueError("--scan-seconds 必须大于 0")
-        # 播报阶段等待胸部相机接入；当前不启用手部相机，也不切换机械臂识别位姿。
-        # 下方原手部相机扫描流程保留，接入胸部相机后可参考复用识别与播报逻辑。
-        guard()
-        print(f"[扫描] {station}: 胸部相机尚未接入，暂不识别播报", flush=True)
-        return []
 
-        # 原播报扫描流程（暂时停用）：
-        self._ensure_arm(guard)
-        # self._ensure_camera(guard)  # 手部相机启用
-        poses = self._observation_poses_for_station(station)
-        seconds_per_point = max(0.5, seconds / len(poses))
-        best: dict[str, dict[str, Any]] = {}
-        try:
-            for index, observation_pose in enumerate(poses, 1):
-                print(f"[扫描] {station}: 识别点 {index}/{len(poses)}", flush=True)
-                # self._guarded(guard, lambda p=observation_pose: self.arm.movej(p))  # 初始位姿 -> 识别位姿
-                self._wait_with_guard(self.settle_seconds, guard)
-                self.pipeline.reset_stability()
-                deadline = time.monotonic() + seconds_per_point
-                while time.monotonic() < deadline:
-                    guard()
-                    remaining = deadline - time.monotonic()
-                    frame = self.camera.get_aligned_frames(
-                        timeout_ms=max(1, min(1000, int(max(0.001, remaining) * 1000)))
-                    )
-                    guard()
-                    if frame is None:
-                        continue
-                    results = self.pipeline.process_frame(
-                        frame["color_image"], frame["depth_frame"], frame["intrinsics"]
-                    )
-                    for result in results:
-                        if result.get("stable") is not True:
-                            continue
-                        label = str(result.get("label", "")).strip()
-                        if not label:
-                            continue
-                        previous = best.get(label)
-                        if previous is None or float(result.get("confidence", 0.0)) > float(previous.get("confidence", 0.0)):
-                            item = dict(result)
-                            item["observation_point"] = index
-                            best[label] = item
-                    if self.show:
-                        display = self.pipeline.draw_results(frame["color_image"], results)
-                        self.module.cv2.imshow("competition_scan", display)
-                        if (self.module.cv2.waitKey(1) & 0xFF) in (ord("q"), 27):
-                            raise KeyboardInterrupt("用户取消比赛扫描")
-        finally:
-            self.transport(guard)
-        detected = sorted(best.values(), key=lambda item: float(item.get("confidence", 0.0)), reverse=True)
-        print(f"[扫描] {station}: " + (", ".join(str(x["label"]) for x in detected) if detected else "未发现稳定目标"), flush=True)
-        return detected
+        guard()
+        print(
+            f"[模拟识别] {station}: 到达播报点；机械臂保持不动、摄像头不启动，"
+            f"等待 {seconds:.1f} 秒。",
+            flush=True,
+        )
+
+        # 模拟真实识别所需时间。等待期间持续检查底盘仍位于当前播报导航点。
+        self._wait_with_guard(seconds, guard)
+        guard()
+
+        result = {
+            "label": "cola",
+            "confidence": 1.0,
+            "stable": True,
+            "simulated": True,
+        }
+        print(f"[模拟识别] {station}: 完成 -> cola", flush=True)
+        return [result]
 
 
     def _grasp_station_from_observation(
@@ -820,10 +795,16 @@ def run_competition(
                 if not label:
                     continue
 
-                # 当前模型按类别识别；同一类别只计一次，避免相邻扫描点重复播报。
+                # 模拟识别阶段每个任务点都完整执行一次语音播报，便于验证
+                # “导航 -> 等待 -> 播报 -> 下一点”的整轮流程。
+                # 将来恢复真实识别时，仍保留原来的“同类别只播报一次”规则。
                 if label not in object_station:
                     object_station[label] = station
-                if label not in announced_labels:
+
+                if detected.get("simulated") is True:
+                    if _speak_label(label):
+                        announced_labels.add(label)
+                elif label not in announced_labels:
                     if _speak_label(label):
                         announced_labels.add(label)
 
