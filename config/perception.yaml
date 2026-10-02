@@ -156,7 +156,7 @@ height_profiles:
     grasp_orientation_rad: [1.514, 0.152, -0.070]
     final_tool_offset_m: [0.0, 0.0, 0.04]
     transition_tool_offset_m: [0.0, 0.0, -0.10]
-S
+
   shelf_1_2m:
     # 【LM点分配】属于 1.2m 高层的 LM 点填在这里。
     stations: []
