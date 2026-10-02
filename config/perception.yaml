@@ -109,7 +109,7 @@ height_profiles:
       - joints_deg: [57.586, 112.896, 33.269, -110.776, -93.458, 116.63]
       # 增加地面第2识别点：取消下一行注释并填实测关节角
       # - joints_deg: [J1, J2, J3, J4, J5, J6]
-    grasp_orientation_rad: [1.719, 0.088, 1.356]
+    grasp_orientation_rad: [1.719, 0.384, 1.356]
     final_tool_offset_m: [0.0, 0.0, 0.04]
     transition_tool_offset_m: [0.0, 0.0, -0.10]
 
@@ -122,7 +122,7 @@ height_profiles:
     rail_position_inc: -2250000  # TODO 填 0.5m 高度对应导轨 inc
     observation_points:
       - joints_deg: [5.03, 96.214, 36.861, -130.156, -104.051, 116.601]  # TODO 实测
-    grasp_orientation_rad: [1.514, 0.152, -0.070]  # TODO 实测
+    grasp_orientation_rad: [1.514, 0.384, -0.070]  # TODO 实测
     final_tool_offset_m: [0.0, 0.0, 0.04]
     transition_tool_offset_m: [0.0, 0.0, -0.10]
 
@@ -134,7 +134,7 @@ height_profiles:
     rail_position_inc: -1500000  # TODO 实测
     observation_points:
       - joints_deg: [5.03, 96.214, 36.861, -130.156, -104.051, 116.601]  # TODO 实测
-    grasp_orientation_rad: [1.514, 0.152, -0.070]
+    grasp_orientation_rad: [1.514, 0.384, -0.070]
     final_tool_offset_m: [0.0, 0.0, 0.04]
     transition_tool_offset_m: [0.0, 0.0, -0.10]
 
@@ -147,7 +147,7 @@ height_profiles:
     observation_points:
       - joints_deg: [5.03, 96.214, 36.861, -130.156, -104.051, 116.601]  # TODO 实测
       # - joints_deg: [J1, J2, J3, J4, J5, J6]  # 可继续增加识别点
-    grasp_orientation_rad: [1.514, 0.152, -0.070]
+    grasp_orientation_rad: [1.514, 0.384, -0.070]
     final_tool_offset_m: [0.0, 0.0, 0.04]
     transition_tool_offset_m: [0.0, 0.0, -0.10]
 
@@ -160,7 +160,7 @@ height_profiles:
     observation_points:
       - joints_deg: [5.03, 96.214, 36.861, -130.156, -104.051, 116.601]
       # - joints_deg: [J1, J2, J3, J4, J5, J6]  # 0.8m 第2识别点预留
-    grasp_orientation_rad: [1.514, 0.152, -0.070]
+    grasp_orientation_rad: [1.514, 0.384, -0.070]
     final_tool_offset_m: [0.0, 0.0, 0.04]
     transition_tool_offset_m: [0.0, 0.0, -0.10]
   shelf_1_2m:
