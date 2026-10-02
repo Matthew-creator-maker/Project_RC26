@@ -11,6 +11,8 @@ except Exception:
     DynamicObstacleTimeout = TimeoutError
 
 import socket
+import math
+import json
 import threading
 import time
 from dataclasses import dataclass
@@ -77,17 +79,32 @@ def require_ack(data, action):
         raise RuntimeError(f"{action}未返回 ret_code=0: {data}")
 
 
-def check_status(data, stopped=False):
+class NavigationSafetyError(RuntimeError):
+    """Navigation stopped for safety; mission must not continue automatically."""
+
+
+def has_block_alarm(data):
+    return any(isinstance(item, dict) and item.get("code") in (52200, "52200")
+               for item in data.get("errors", []))
+
+
+def check_status(data, stopped=False, allow_blocked_alarm=False):
     for key in ("is_stop", "blocked", "emergency"):
         if type(data.get(key)) is not bool:
             raise RuntimeError(f"实时推送缺少布尔字段 {key}")
     for key in ("fatals", "errors"):
         if not isinstance(data.get(key), list):
             raise RuntimeError(f"实时推送缺少报警数组 {key}")
-        if data[key]:
-            raise RuntimeError(f"底盘报警 {key}={data[key]}")
     if data["emergency"]:
         raise RuntimeError("底盘急停已触发")
+    if data["fatals"]:
+        raise RuntimeError(f"底盘报警 fatals={data['fatals']}")
+    errors = data["errors"]
+    if allow_blocked_alarm and not stopped:
+        errors = [item for item in errors if not (
+            isinstance(item, dict) and item.get("code") in (52200, "52200"))]
+    if errors:
+        raise RuntimeError(f"底盘报警 errors={errors}")
     if stopped and (not data["is_stop"] or data["blocked"]):
         raise RuntimeError("底盘未静止或被阻挡，不能执行机械臂动作")
 
@@ -201,13 +218,24 @@ class Navigator:
             monitor = PushMonitor(protocol, config)
         self.api, self.monitor = api, monitor
         self.active = False
+        self.recovery_required = False
+
+    def _check_recovery(self):
+        if self.recovery_required:
+            raise NavigationSafetyError("导航安全锁已触发，禁止自动发车；请人工核实停止与障碍后重新启动程序")
+
+    def _seconds(self, key, default):
+        value = float(self.config.get(key, default))
+        if not math.isfinite(value) or value <= 0:
+            raise ValueError(f"navigation.{key} 必须为有限正数")
+        return value
 
     def connect(self):
         self.monitor.connect()
         if not self.api.start():
             raise ConnectionError("导航状态查询失败")
         print(
-            "[导航] 保留底盘原生避障；程序不做绕路，只在持续阻塞后回退上一任务点",
+            "[导航] 受阻等待，持续受阻取消并确认停止；无自动回退；底盘原生安全停车仍须实测",
             flush=True,
         )
 
@@ -221,6 +249,7 @@ class Navigator:
         return status
 
     def assert_at(self, station):
+        self._check_recovery()
         data = self.monitor.snapshot().data
         check_status(data, stopped=True)
         if data.get("current_station") != station:
@@ -228,6 +257,7 @@ class Navigator:
         return data
 
     def current_station(self):
+        self._check_recovery()
         data = self.monitor.snapshot().data
         check_status(data, stopped=True)
         station = data.get("current_station")
@@ -252,97 +282,44 @@ class Navigator:
 
     def _wait_cancelled_and_stopped(self, counter):
         """取消当前导航后，等待底盘确认不再执行任务且已经停止。"""
-        deadline = time.monotonic() + max(
+        deadline = time.monotonic() + self._seconds("cancel_stop_timeout_s", max(
             self.config["state_timeout_s"] * 2.0,
             self.config["request_timeout_s"],
-        )
+        ))
+        settled = 0
         while True:
             remaining = deadline - time.monotonic()
             if remaining <= 0:
-                raise DynamicObstacleTimeout("取消当前导航后底盘未及时停止")
+                raise NavigationSafetyError("取消后未确认停止，禁止后续发车；请立即核对底盘，必要时实体急停")
             snap = self.monitor.wait_new(counter, min(remaining, self.config["state_timeout_s"]))
             counter = snap.counter
-            check_status(snap.data)
+            check_status(snap.data, allow_blocked_alarm=True)
             status = self.task_status()
-            if status not in (1, 2, 3) and snap.data["is_stop"]:
+            settled = settled + 1 if status not in (1, 2, 3) and snap.data["is_stop"] else 0
+            if settled >= self.config["settled_frames"]:
                 return snap
 
-    def _return_to_previous_task_point(self, previous_station, counter):
-        """阻塞回退：取消当前目标，并从当前位置返回上一任务点；不尝试绕路。"""
-        print(
-            f"[阻塞回退] 持续阻塞，取消当前导航并返回上一任务点 {previous_station}",
-            flush=True,
-        )
-        self.cancel()
-        snap = self._wait_cancelled_and_stopped(counter)
-
-        # 取消后如果底盘仍处在上一任务点范围内，则不重复下发导航。
-        if (snap.data.get("current_station") == previous_station
-                and snap.data["is_stop"] and not snap.data["blocked"]):
-            self.assert_at(previous_station)
-            print(f"[阻塞回退] 已回到上一任务点 {previous_station}", flush=True)
-            return
-
-        # source_id 留空表示从当前实际位置重新规划到上一任务点。
-        # 项目自带 AGV API demo 也保留了 navigate_to("", "LM1") 的调用方式。
-        self.active = True
-        require_ack(self.api.navigate_to("", previous_station), "阻塞回退")
-
-        deadline = time.monotonic() + self.config["navigation_timeout_s"]
-        counter = snap.counter
-        settled = 0
-        previous_status = None
-        while True:
-            remaining = deadline - time.monotonic()
-            if remaining <= 0:
-                raise DynamicObstacleTimeout(f"返回上一任务点 {previous_station} 超时")
-            snap = self.monitor.wait_new(counter, min(remaining, self.config["state_timeout_s"]))
-            counter = snap.counter
-            check_status(snap.data)
-            status = self.task_status()
-            if status != previous_status:
-                print(
-                    f"[阻塞回退] 当前 -> {previous_station}，task_status={status}",
-                    flush=True,
-                )
-                previous_status = status
-            if status in (5, 6):
-                raise RuntimeError(
-                    f"返回上一任务点 {previous_station} 失败或取消，task_status={status}"
-                )
-
-            arrived = (
-                snap.data.get("current_station") == previous_station
-                and snap.data["is_stop"]
-                and not snap.data["blocked"]
-                and status == 4
-            )
-            settled = settled + 1 if arrived else 0
-            if settled >= self.config["settled_frames"]:
-                self.assert_at(previous_station)
-                self.active = False
-                print(
-                    f"[阻塞回退] 已返回上一任务点 {previous_station}，"
-                    f"连续 {settled} 个新状态帧确认静止",
-                    flush=True,
-                )
-                return
 
     def go_to(self, destination, expected_source):
+        self._check_recovery()
         self.assert_at(expected_source)
         if self.task_status() in (1, 2, 3):
             raise RuntimeError("底盘已有导航任务，不能覆盖")
         deadline = time.monotonic() + self.config["navigation_timeout_s"]
         moving = expected_source != destination
-        suspended_timeout = float(self.config.get("suspended_timeout_s", 8.0))
-        if suspended_timeout <= 0:
-            raise ValueError("navigation.suspended_timeout_s 必须大于 0")
+        # These are supervisory budgets, not guaranteed braking times.
+        # Old blocked_timeout_s/suspended_timeout_s are intentionally not used.
+        blocked_wait = self._seconds("blocked_wait_timeout_s", 10.0)
+        stop_timeout = self._seconds("blocked_stop_timeout_s", 2.0)
+        suspended_timeout = self._seconds("suspended_wait_timeout_s", 10.0)
         try:
             if moving:
                 self.active = True  # ACK 丢失时也尝试取消。
                 require_ack(self.api.navigate_to(expected_source, destination), "导航")
             counter = self.monitor.snapshot().counter
             settled, blocked_since, suspended_since = 0, None, None
+            moving_blocked_since = None
+            clear_frames = 0
             previous_status = None
             while True:
                 remaining = deadline - time.monotonic()
@@ -350,26 +327,42 @@ class Navigator:
                     raise DynamicObstacleTimeout(f"导航到 {destination} 超时")
                 snap = self.monitor.wait_new(counter, min(remaining, self.config["state_timeout_s"]))
                 counter = snap.counter
-                check_status(snap.data)
+                check_status(snap.data, allow_blocked_alarm=True)
                 now = time.monotonic()
-                if snap.data["blocked"]:
+                obstacle = snap.data["blocked"] or has_block_alarm(snap.data)
+                if obstacle:
+                    settled = 0
+                    clear_frames = 0
                     if blocked_since is None:
                         blocked_since = now
-                    if now - blocked_since >= self.config["blocked_timeout_s"]:
-                        self._return_to_previous_task_point(expected_source, counter)
-                        raise DynamicObstacleTimeout(
-                            f"前往 {destination} 持续受阻，已返回上一任务点 {expected_source}"
-                        )
-                else:
-                    blocked_since = None
+                        print(f"[受阻] blocked={snap.data['blocked']}，is_stop={snap.data['is_stop']}；最多等待 {blocked_wait:.1f}s，不回退、不重新发车", flush=True)
+                    if snap.data["is_stop"]:
+                        moving_blocked_since = None
+                    elif moving_blocked_since is None:
+                        moving_blocked_since = now
+                    elif now - moving_blocked_since >= stop_timeout:
+                        raise NavigationSafetyError("已受阻但仍未上报停止，取消导航；软件取消不能代替实体急停")
+                    if now - blocked_since >= blocked_wait:
+                        raise NavigationSafetyError(f"持续受阻超过 {blocked_wait:.1f}s，取消并停止本轮任务，不自动回退")
+                elif blocked_since is not None:
+                    moving_blocked_since = None
+                    clear_frames += 1
+                    if clear_frames >= self.config["settled_frames"]:
+                        print("[障碍清除] 连续新状态帧确认，无新发车指令；观察底盘是否继续原任务", flush=True)
+                        blocked_since = None
+                        clear_frames = 0
 
                 status = self.task_status()
+                if self.config.get("log_navigation_frames", False):
+                    print(json.dumps({"event": "navigation_status", "t": round(time.time(), 3),
+                                      "from": expected_source, "to": destination,
+                                      "task_status": status, **snap.data},
+                                     ensure_ascii=False), flush=True)
                 if status != previous_status:
                     print(f"[导航] {expected_source} -> {destination}，task_status={status}", flush=True)
                     previous_status = status
 
-                # SUSPENDED 持续存在时不等待底盘另寻路径；达到阈值后直接回退。
-                # 短暂暂停仍留出少量去抖时间，避免单帧状态抖动触发回退。
+                # A suspended task is not necessarily an obstacle; never auto-resume it.
                 if moving and status == 3:
                     if suspended_since is None:
                         suspended_since = now
@@ -378,12 +371,7 @@ class Navigator:
                             flush=True,
                         )
                     elif now - suspended_since >= suspended_timeout:
-                        self._return_to_previous_task_point(expected_source, counter)
-                        raise DynamicObstacleTimeout(
-                            f"导航持续暂停超过 {suspended_timeout:.1f}s，"
-                            f"已返回上一任务点 {expected_source}: "
-                            f"{expected_source} -> {destination}"
-                        )
+                        raise NavigationSafetyError(f"导航持续暂停超过 {suspended_timeout:.1f}s，取消并确认停止，不自动回退")
                 else:
                     suspended_since = None
 
@@ -392,7 +380,7 @@ class Navigator:
                 if time.monotonic() >= deadline:
                     raise DynamicObstacleTimeout(f"导航到 {destination} 超时")
                 arrived = (snap.data.get("current_station") == destination
-                           and snap.data["is_stop"] and not snap.data["blocked"]
+                           and snap.data["is_stop"] and not obstacle and blocked_since is None
                            and (status == 4 if moving else status in (0, 4, 5, 6)))
                 settled = settled + 1 if arrived else 0
                 if settled >= self.config["settled_frames"]:
@@ -406,13 +394,22 @@ class Navigator:
             raise
 
     def cancel(self):
+        self.recovery_required = True
+        counter = None
+        try:
+            counter = self.monitor.snapshot().counter
+        except Exception:
+            pass  # Still send cancellation even if the status stream is lost.
         try:
             self.api.cancel_navigation()
-            print("[取消] 底盘已确认取消请求；请核对实际停止状态", flush=True)
+            print("[取消] 已收到取消请求响应，正在核对任务状态和实际停止上报", flush=True)
+            if counter is None:
+                raise NavigationSafetyError("已请求取消，但状态连接失效，无法确认停止；禁止后续发车")
+            self._wait_cancelled_and_stopped(counter)
         except Exception as exc:
-            print(f"[取消] 未能确认取消导航: {exc}", flush=True)
-        finally:
-            self.active = False
+            raise NavigationSafetyError(f"取消/停车确认失败：{exc}；请核对底盘并准备实体急停") from exc
+        self.active = False
+        print("[停止确认] 任务已不在执行且连续上报静止；导航安全锁保持，禁止自动发车", flush=True)
 
     def close(self):
         try:
