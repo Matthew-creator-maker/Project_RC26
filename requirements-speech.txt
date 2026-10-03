@@ -1,0 +1,5 @@
+# 默认模拟核验和自动测试只依赖 Python 标准库。
+# 手动启用真实语音时，TTS 服务使用以下库；Linux 播放还需要系统 mpg123。
+edge-tts
+fastapi
+uvicorn

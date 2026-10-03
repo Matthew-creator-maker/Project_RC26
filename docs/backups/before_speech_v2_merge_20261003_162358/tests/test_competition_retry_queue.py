@@ -16,7 +16,6 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 
 from app import main
-from modules.audio.speech import CompetitionAnnouncements
 
 
 class FakeRail:
@@ -177,20 +176,17 @@ class RetryQueueTests(unittest.TestCase):
         )
         if ctx:
             ctx.__enter__()
-        # 注入实际播报业务类和假播放器，不调用 TTS 服务或真实扬声器。
-        announcements = CompetitionAnnouncements(speaker=lambda _text: True)
         try:
-            result = main.run_competition(
-                self.config,
-                make_args(),
-                navigator_factory=lambda _cfg: nav,
-                grasp_factory=programs or FakeProgramFactory(),
-                scanner_factory=lambda _cfg, _args: scanner,
-                rail_factory=rail_factory,
-                announcements=announcements,
-            )
+            with patch.object(main, "speak_blocking", return_value=True):
+                result = main.run_competition(
+                    self.config,
+                    make_args(),
+                    navigator_factory=lambda _cfg: nav,
+                    grasp_factory=programs or FakeProgramFactory(),
+                    scanner_factory=lambda _cfg, _args: scanner,
+                    rail_factory=rail_factory,
+                )
         finally:
-            announcements.close(wait=True)
             if ctx:
                 ctx.__exit__(None, None, None)
         return result, nav
@@ -311,16 +307,12 @@ class RetryQueueTests(unittest.TestCase):
             scan_plan={station: [] for station in main.SCAN_ROUTE},
         )
         nav = FakeNavigator({})
-        announcements = CompetitionAnnouncements(speaker=lambda _text: True)
-        try:
+        with patch.object(main, "speak_blocking", return_value=True):
             with self.assertRaisesRegex(RuntimeError, "arm communication failed"):
                 main.run_competition(
                     self.config, make_args(), navigator_factory=lambda _: nav,
                     scanner_factory=lambda _cfg, _args: scanner, rail_factory=FakeRail,
-                    announcements=announcements,
                 )
-        finally:
-            announcements.close(wait=True)
         self.assertNotIn(("LM6", "LM5"), nav.commands)
 
     def test_retreat_failure_prevents_navigation(self):
@@ -335,16 +327,12 @@ class RetryQueueTests(unittest.TestCase):
             original_transport(guard)
         scanner.transport = transport
         nav = FakeNavigator({})
-        announcements = CompetitionAnnouncements(speaker=lambda _text: True)
-        try:
+        with patch.object(main, "speak_blocking", return_value=True):
             with self.assertRaisesRegex(RuntimeError, "禁止移动底盘"):
                 main.run_competition(
                     self.config, make_args(), navigator_factory=lambda _: nav,
                     scanner_factory=lambda _cfg, _args: scanner, rail_factory=FakeRail,
-                    announcements=announcements,
                 )
-        finally:
-            announcements.close(wait=True)
         self.assertNotIn(("LM6", "LM5"), nav.commands)
 
 
@@ -352,19 +340,11 @@ class ScannerTargetTests(unittest.TestCase):
     def test_empty_expected_labels_allows_live_recognition(self):
         # 新规则：空 expected_labels 不再因“扫描阶段无记录”而直接拒绝。
         scanner = main.CompetitionScanner.__new__(main.CompetitionScanner)
-        scanner.announcements = CompetitionAnnouncements(speaker=lambda _text: True)
-        try:
-            with self.assertRaises(AttributeError):
-                scanner.grasp_station_once("LM5", 1, 1, lambda: None, expected_labels=[])
-        finally:
-            scanner.announcements.close(wait=True)
+        with self.assertRaises(AttributeError):
+            scanner.grasp_station_once("LM5", 1, 1, lambda: None, expected_labels=[])
 
     def test_scanner_ignores_unrecorded_higher_confidence_target(self):
         scanner = main.CompetitionScanner.__new__(main.CompetitionScanner)
-        spoken = []
-        scanner.announcements = CompetitionAnnouncements(
-            speaker=lambda text: spoken.append(text) or True
-        )
         scanner.vision_config = {"grasp_test": {"stable_samples": 1}}
         scanner._arm_connected = True
         scanner._camera_started = True
@@ -395,16 +375,11 @@ class ScannerTargetTests(unittest.TestCase):
                 "target": label, "xyz_camera_m": point.tolist(),
             },
         )
-        try:
-            result = scanner.grasp_station_once(
-                "LM5", 1, 1, lambda: None, expected_labels=["Cola"]
-            )
-        finally:
-            # 只在测试收尾等待后台队列，抓取调用本身不等待播报结束。
-            scanner.announcements.close(wait=True)
+        result = scanner.grasp_station_once(
+            "LM5", 1, 1, lambda: None, expected_labels=["Cola"]
+        )
         self.assertEqual(result["target"], "Cola")
         self.assertEqual(result["xyz_camera_m"], [0.1, 0.2, 0.3])
-        self.assertEqual(spoken, ["识别到可乐"])
 
 
 if __name__ == "__main__":

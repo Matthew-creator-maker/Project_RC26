@@ -1,90 +1,100 @@
-# chat.py
-import edge_tts
-import uvicorn
-from fastapi import FastAPI, Body, Response
+"""V2 任务播报使用的 TTS 服务候选版，保持现有 HTTP 协议与 8002 端口。
+
+启动命令（项目根目录）：python -m modules.audio.chat
+需要现有环境中的 edge_tts、fastapi、uvicorn。不会安装任何依赖。
+合成需要 Edge TTS 服务可用；已有有效缓存则直接返回缓存。
+本模块不导入对话助手、麦克风、ASR 或 VAD，也不会主动终止占用端口的
+其他进程。端口占用时 uvicorn 会正常报错，交由使用者检查。
+"""
+
+from __future__ import annotations
+
+import asyncio
 import os
-import hashlib
-import shutil
-import glob
-import re
-from datetime import datetime
 import sys
+import tempfile
 from pathlib import Path
 
-PROJECT_ROOT = Path(__file__).resolve().parents[3]
-sys.path.insert(0, str(PROJECT_ROOT))
-from common.config import LANGUAGE
-from common.port_guard import ensure_port_free
+# 兼容旧习惯：python modules/audio/chat.py。
+# chat.py 的 parents[2] 才是 robocup_embody 项目根目录。
+if __package__ in (None, ""):
+    sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 
-# 安全文件名函数（必须与客户端完全一致）
-def safe_filename(text: str, max_len=100) -> str:
-    illegal_chars = r'[\\/*?:"<>|]'
-    safe = re.sub(illegal_chars, '_', text)
-    safe = safe.strip('. ')
-    if len(safe) > max_len:
-        safe = safe[:max_len]
-    return safe + ".mp3"
+import edge_tts
+import uvicorn
+from fastapi import Body, FastAPI, HTTPException, Response
 
-app = FastAPI()
+from modules.audio.speech_utils import (
+    MAX_AUDIO_BYTES,
+    cache_filename,
+    is_probably_mp3,
+    read_valid_mp3,
+    validate_speed,
+    write_bytes_atomic,
+)
 
-if LANGUAGE == "en":
-    VOICE_DEFAULT = "en-US-JennyNeural"
-else:
-    VOICE_DEFAULT = "zh-CN-XiaoxiaoNeural"
 
-BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-AUDIO_DIR = os.path.join(BASE_DIR, "audio_cache")
-CACHE_SUBDIR = os.path.join(AUDIO_DIR, "cache")
-os.makedirs(AUDIO_DIR, exist_ok=True)
-os.makedirs(CACHE_SUBDIR, exist_ok=True)
+VOICE_DEFAULT = "zh-CN-XiaoxiaoNeural"
+AUDIO_DIR = Path(__file__).resolve().parent / "audio_cache" / "tts_service"
+app = FastAPI(title="RoboCup 物品中文播报 TTS")
+_cache_locks: dict[str, asyncio.Lock] = {}
 
-def speed_to_rate(speed):
-    percent = int((speed - 1.0) * 100)
+
+def speed_to_rate(speed: float) -> str:
+    """把 1.2 转换成 Edge TTS 接受的 '+20%'。"""
+    percent = round((validate_speed(speed) - 1.0) * 100)
     return f"{percent:+d}%"
+
 
 @app.post("/v1/audio/speech")
 async def speech(
     model: str = Body("tts-1", embed=True),
-    input: str = Body(..., embed=True),
-    voice: str = Body(VOICE_DEFAULT, embed=True),
-    speed: float = Body(1.0, embed=True)
-):
-    # 主缓存路径（与客户端一致）
-    cache_filename = safe_filename(input)
-    cache_path = os.path.join(AUDIO_DIR, cache_filename)
+    input: str = Body(..., embed=True, min_length=1, max_length=500),
+    voice: str = Body(VOICE_DEFAULT, embed=True, min_length=1, max_length=100),
+    speed: float = Body(1.0, embed=True, ge=0.5, le=2.0),
+) -> Response:
+    """接收与原接口一致的 JSON 请求，返回完整 MP3 数据。
 
-    # 如果主缓存已存在，直接返回
-    if os.path.exists(cache_path):
-        return Response(content=open(cache_path, "rb").read(), media_type="audio/mpeg")
+    model 字段为了兼容已有调用而保留；实际合成使用 edge_tts。
+    相同缓存键共用一把异步锁，避免同时请求把同一个缓存写坏。
+    客户端与本服务使用 speech_utils.py 中同一个缓存键算法；内容、音色、
+    语速任意一项改变，都会合成对应的新文件，避免复用旧音色。
+    """
+    if not input.strip() or not voice.strip():
+        raise HTTPException(status_code=422, detail="input 和 voice 不能为空白")
+    filename = cache_filename(input, voice, speed)
+    path = AUDIO_DIR / filename
+    lock = _cache_locks.setdefault(filename, asyncio.Lock())
+    async with lock:
+        cached = read_valid_mp3(path)
+        if cached is not None:
+            return Response(content=cached, media_type="audio/mpeg")
 
-    # 生成原始备份文件名（时间戳+哈希，仅作备份）
-    timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
-    text_hash = hashlib.md5(input.encode()).hexdigest()[:8]
-    backup_filename = f"{timestamp}_{text_hash}.mp3"
-    backup_path = os.path.join(CACHE_SUBDIR, backup_filename)
+        # 导入模块时不创建目录；只有明确的合成请求才准备文件。
+        temporary_path: Path | None = None
+        try:
+            AUDIO_DIR.mkdir(parents=True, exist_ok=True)
+            descriptor, temporary_name = tempfile.mkstemp(
+                prefix=".tts-", suffix=".mp3", dir=AUDIO_DIR
+            )
+            os.close(descriptor)
+            temporary_path = Path(temporary_name)
+            communicate = edge_tts.Communicate(input, voice, rate=speed_to_rate(speed))
+            await communicate.save(str(temporary_path))
+            if temporary_path.stat().st_size > MAX_AUDIO_BYTES:
+                raise ValueError("合成音频超过允许大小")
+            audio = temporary_path.read_bytes()
+            if not is_probably_mp3(audio):
+                raise ValueError("合成服务返回的内容不是有效的 MP3 开头")
+            write_bytes_atomic(path, audio)
+            return Response(content=audio, media_type="audio/mpeg")
+        except Exception as exc:
+            print(f"[TTS 合成失败] {exc}", flush=True)
+            raise HTTPException(status_code=502, detail="TTS 合成失败，请查看服务日志") from exc
+        finally:
+            if temporary_path is not None:
+                temporary_path.unlink(missing_ok=True)
 
-    # 调用 edge_tts 生成音频到备份路径
-    communicate = edge_tts.Communicate(input, voice, rate=speed_to_rate(speed))
-    try:
-        await communicate.save(backup_path)
-    except Exception as e:
-        return Response(content=f"TTS failed: {e}", status_code=500)
-
-    # 复制到主缓存路径
-    shutil.copy2(backup_path, cache_path)
-
-    # 清理旧备份（保留最近200个）
-    try:
-        backups = glob.glob(os.path.join(CACHE_SUBDIR, "*.mp3"))
-        if len(backups) > 200:
-            backups.sort(key=os.path.getmtime)
-            for f in backups[:-200]:
-                os.remove(f)
-    except:
-        pass
-
-    return Response(content=open(cache_path, "rb").read(), media_type="audio/mpeg")
 
 if __name__ == "__main__":
-    ensure_port_free(8002, "TTS")
     uvicorn.run(app, host="0.0.0.0", port=8002)

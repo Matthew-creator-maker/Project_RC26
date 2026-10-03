@@ -1,8 +1,7 @@
 """队友当前比赛流程与配套配置的多相机合并版本。
 
 task_config.json 管路线；recognition.yaml 管胸部/头部分组；perception.yaml 管模型与左臂抓取。
-全图扫描播报结束后进入抓取阶段；单次抓取采样后，语音与抓取并行。
-保留当前 6 秒默认扫描时间与 SDK 故障即终止的抓取策略。
+识别播报完成后才抓取；保留当前 6 秒默认时间与 SDK 故障即终止的抓取策略。
 当前 JSON 的导航映射为空；填写说明见 04_队友配置合并说明.md。
 """
 from __future__ import annotations
@@ -28,8 +27,10 @@ CONFIG_DIR = PROJECT_ROOT / "config"
 if str(PROJECT_ROOT) not in sys.path:
     sys.path.insert(0, str(PROJECT_ROOT))
 
-# [语音 V2] 只导入轻量业务模块；导入/创建对象不播放、不联网、不启动线程。
-from modules.audio.speech import CompetitionAnnouncements
+try:
+    from common.utils.voice_speak import speak_blocking
+except Exception:  # 语音模块在无硬件/测试环境中可能无法导入。
+    speak_blocking = None
 
 
 # ============================================================================
@@ -229,6 +230,24 @@ def _safe_close(program) -> None:
         program.close()
 
 
+def _speak_label(label: str, attempts: int = 2) -> bool:
+    """阻塞播报一个类别；失败时有限重试，只有真正成功才算“已播报”."""
+    text = f"识别到{label}"
+    print(f"[播报] {text}", flush=True)
+    if speak_blocking is None:
+        print("[播报警告] voice_speak 导入失败，本次不把该目标记为已播报。", flush=True)
+        return False
+    attempts = max(1, int(attempts))
+    for index in range(attempts):
+        if bool(speak_blocking(text)):
+            return True
+        if index + 1 < attempts:
+            print(f"[播报] 第 {index + 1} 次失败，立即重试。", flush=True)
+            time.sleep(0.15)
+    print(f"[播报警告] {label} 播报未确认成功；后续再次看到时会继续尝试。", flush=True)
+    return False
+
+
 class CompetitionScanner:
     """先按点位分组用胸部/头部识别，再用原左臂相机重新定位并抓取。
 
@@ -236,15 +255,9 @@ class CompetitionScanner:
     三份配置的填写方法见 04_队友配置合并说明.md。
     """
 
-    def __init__(
-        self, config: dict[str, Any], args: argparse.Namespace,
-        announcements: CompetitionAnnouncements | None = None,
-    ):
+    def __init__(self, config: dict[str, Any], args: argparse.Namespace):
         self.config = config
         self.args = args
-        # [语音 V2] 正式流程把本轮业务对象传给扫描器；可注入假播放器来核验。
-        self.announcements = (announcements if announcements is not None
-                              else CompetitionAnnouncements())
         # 全图识别点必须在出发前完成分组检查；不等走到高柜才发现漏填相机。
         self.recognition_settings = load_recognition_settings(config)
         plan = competition_plan(config)
@@ -598,19 +611,6 @@ class CompetitionScanner:
             flush=True,
         )
 
-        # [语音 V2] 稳定采样已经完成，只提交本次锁定目标的一条播报任务。
-        # 异步接口只把文字放到后台队列，不在这里请求网络或等待音频播放。
-        # 播报和下面的抓取流程并行；不能对 Future 调用 result()/等待完成。
-        # 后台线程只负责声音，绝不控制相机、底盘或机械臂。
-        guard()
-        submitted = self.announcements.announce_before_grasp_async(
-            target_label, station=station
-        )
-        if submitted is None:
-            print(f"[语音 V2 警告] {target_label}@{station}: 未能提交播报，继续原抓取流程。", flush=True)
-        # 保留运动前的点位检查；不等待语音，也不改动下面的 IK / 运动检查。
-        guard()
-
         # 直接使用刚才同一次识别得到的坐标执行抓取。
         # 不回运输位、不重新加载 YOLO、不重启相机、不再次进入观测位。
         return self.module.execute_prelocalized_grasp(
@@ -730,7 +730,6 @@ def run_competition(
     grasp_factory: Callable[..., Any] = GraspProgram,
     scanner_factory: Callable[..., Any] = CompetitionScanner,
     rail_factory: Callable[..., Any] | None = None,
-    announcements: CompetitionAnnouncements | None = None,
 ) -> dict[str, Any]:
     """运行比赛策略：LM2->LM6 播报 -> LM6->LM2 抓取 -> 失败点重试 -> LM7 得分 -> LM8 离场。"""
     plan = competition_plan(config)
@@ -770,11 +769,8 @@ def run_competition(
     rail = None
     active_program = None
     delivered_count = 0
-    # [语音 V2] 每轮任务共用一份播报规则；扫描去重按“点位＋类别”而不是类别。
-    announcement_service = (announcements if announcements is not None
-                            else CompetitionAnnouncements())
-    object_station: dict[str, str] = {}  # 保留旧报告：首次发现该类别的点位。
-    object_stations: dict[str, list[str]] = {}  # 新报告：同类物品发现过的所有点位。
+    announced_labels: set[str] = set()
+    object_station: dict[str, str] = {}
     results: list[dict[str, Any]] = []
     started_at = time.monotonic()
 
@@ -809,8 +805,6 @@ def run_competition(
             from modules.hardware.mission_slide.controller import MissionSlide
             rail_factory = MissionSlide
         scanner = scanner_factory(config, args)
-        # [语音 V2] 保留 scanner_factory 的两参数调用方式。
-        scanner.announcements = announcement_service
         rail = rail_factory()  # 相机分组/模型预检完成后再创建导轨驱动。
 
         # 播报阶段开始前，机械臂先进入初始/运输位姿。
@@ -830,8 +824,6 @@ def run_competition(
                 print(f"[扫描] {station} 的播报观察点为 {scan_nav_station}", flush=True)
             # _prepare_rail_for_station(rail, scanner, station)  # 播报阶段识别高度切换暂时停用
 
-            # [语音 V2] 每次实际到点开始一段新的扫描；重访同一点也允许重新播报。
-            announcement_service.begin_scan(station)
             detections = scanner.scan_station(
                 station,
                 args.scan_seconds,
@@ -842,15 +834,12 @@ def run_competition(
                 if not label:
                     continue
 
-                # [语音 V2] 保留英文业务标签，同时记录这个类别的所有发现点位。
+                # [多相机接入] 真实检测结果按类别去重；不再每到一点固定播报 cola。
                 if label not in object_station:
                     object_station[label] = station
-                stations = object_stations.setdefault(label, [])
-                if station not in stations:
-                    stations.append(station)
-                # 同次到点扫描中，同类成功播一次；换点以后会再次播报。
-                # 例如 LM2 与 LM9 都有 sprite，就分别说一次“识别到雪碧”。
-                announcement_service.announce_scan(label, station=station)
+                if label not in announced_labels:
+                    if _speak_label(label):
+                        announced_labels.add(label)
 
         # [多相机接入] 识别阶段完成，释放胸部/头部设备，抓取阶段再启用左臂。
         finish_recognition = getattr(scanner, "finish_recognition", None)
@@ -868,7 +857,7 @@ def run_competition(
                 raise RuntimeError("扫描结束后无法到达 LM6，不能开始反向抓取")
 
         print(
-            f"[识别汇总] 共记录 {len(object_stations)} 个类别，所有发现点位: {object_stations}",
+            f"[识别汇总] 共记录 {len(object_station)} 个类别: {object_station}",
             flush=True,
         )
 
@@ -885,11 +874,11 @@ def run_competition(
         #   7. 若有导航失败、工作空间越界等未确认情况，不能误判为空，继续下一轮；
         #   8. 任意时刻达到 match_seconds（默认 480 秒/8 分钟）立即停止新增抓取。
         #
-        # [语音 V2] 同类别可能在多个点出现，各点类别提示都保留。
-        # 这些记录仍然只作提示，抓取必须按原流程进行现场识别。
+        # 注意：扫描阶段 object_station/labels_by_station 仅用于播报和首轮类别提示，
+        # 不再决定某个 LM 点是否允许进入识别位姿。
         labels_by_station = {
             station: sorted(
-                label for label, owners in object_stations.items() if station in owners
+                label for label, owner in object_station.items() if owner == station
             )
             for station in plan.grasp_priority
         }
@@ -1129,17 +1118,12 @@ def run_competition(
             if not _navigate_or_skip(navigator, plan.exit_station, "离场"):
                 raise RuntimeError("无法到达 LM8 离场点")
 
-        # [语音 V2] 只在任务已经离场后收尾后台语音，避免正常退出截断最后一句。
-        # 任何单次抓取都没有等待语音；异常清理也不等待剩余队列。
-        announcement_service.close(wait=True)
         print(f"=== Mission Finished: exited via {plan.exit_station} ===", flush=True)
         return {
             "mode": "execute",
             "station": plan.exit_station,
-            "announced": sorted(announcement_service.announced_scan_labels),
-            "announced_by_station": announcement_service.announced_scan_by_station,
+            "announced": sorted(announced_labels),
             "object_station": object_station,
-            "object_stations": object_stations,
             "delivered_count": delivered_count,
             "completed_stations": sorted(completed_stations),
             "pending_stations": list(pending_stations),
@@ -1149,11 +1133,6 @@ def run_competition(
 
     finally:
         close_error = None
-        # [语音 V2] 幂等关闭，不在机器人异常处理期间等网络/音频。
-        try:
-            announcement_service.close(wait=False)
-        except Exception as exc:
-            print(f"[语音 V2 清理警告] {exc}", flush=True)
         if rail is not None and rail.lowered:
             print("[导轨] 异常终止且导轨仍处低位，请确认机械臂姿态后人工处理。", flush=True)
         try:

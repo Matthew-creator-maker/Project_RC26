@@ -1,0 +1,87 @@
+{
+  "tests_run": 154,
+  "failures": 1,
+  "errors": 0,
+  "skipped": 22,
+  "successful": false,
+  "syntax_files": [
+    "app/main.py",
+    "modules/audio/__init__.py",
+    "modules/audio/chat.py",
+    "modules/audio/speech.py",
+    "modules/audio/speech_utils.py",
+    "tools/review_speech.py",
+    "tests/test_competition_retry_queue.py",
+    "tests/test_latest_multicamera_merge.py",
+    "tests/test_multicamera_recognition.py",
+    "tests/test_speech_audio.py",
+    "tests/test_speech_policy.py",
+    "tests/test_speech_workflow.py"
+  ],
+  "unchanged_files": [
+    {
+      "path": "D:\\robocup_embody\\common\\utils\\voice_speak.py",
+      "unchanged": true
+    },
+    {
+      "path": "D:\\robocup_embody\\modules\\audio\\voice_assiant.py",
+      "unchanged": true
+    },
+    {
+      "path": "D:\\robocup_embody\\config\\task_config.json",
+      "unchanged": true
+    },
+    {
+      "path": "D:\\robocup_embody\\config\\perception.yaml",
+      "unchanged": true
+    },
+    {
+      "path": "D:\\robocup_embody\\config\\recognition.yaml",
+      "unchanged": true
+    }
+  ],
+  "preview": {
+    "mode": "preview",
+    "start": "LM1",
+    "scan_route": [
+      "LM2",
+      "LM3",
+      "LM4",
+      "LM5",
+      "LM6"
+    ],
+    "home": "LM6",
+    "grasp_priority": [
+      "LM6",
+      "LM5",
+      "LM4",
+      "LM3",
+      "LM2"
+    ],
+    "score": "LM7",
+    "exit": "LM8",
+    "recognition_cameras": {
+      "LM2": {
+        "role": "chest",
+        "serial": "151222073707"
+      },
+      "LM3": {
+        "role": "chest",
+        "serial": "151222073707"
+      },
+      "LM4": {
+        "role": "chest",
+        "serial": "151222073707"
+      },
+      "LM5": {
+        "role": "chest",
+        "serial": "151222073707"
+      },
+      "LM6": {
+        "role": "chest",
+        "serial": "151222073707"
+      }
+    }
+  },
+  "old_voice_assistant_loaded": false
+}

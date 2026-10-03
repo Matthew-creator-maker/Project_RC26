@@ -7,7 +7,6 @@ from unittest.mock import patch
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 from app import main
-from modules.audio.speech import CompetitionAnnouncements
 from modules.perception.recognition_config import load_recognition_settings
 
 
@@ -24,7 +23,7 @@ class TeammateMergeTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, "未分配"):
             settings.camera_for_station("LM15")
 
-    def test_transport_before_navigation_and_real_labels_announced_per_station(self):
+    def test_transport_before_navigation_and_real_labels_announced_once(self):
         config = main.load_settings(ROOT / "config/task_config.json")
         args = main.build_parser().parse_args(["--execute", "--confirm-calibration", "--no-show"])
         events = []
@@ -46,9 +45,8 @@ class TeammateMergeTests(unittest.TestCase):
             def scan_station(self, station, seconds, guard):
                 guard()
                 events.append(("scan", station, nav.station, seconds))
-                # 同类别跨点分别播报；同一次扫描中的重复检测只成功播报一次。
-                return [{"label": "cola", "confidence": 0.9},
-                        {"label": "cola", "confidence": 0.8}]
+                # 同类别跨点重复出现，合并后应只成功播报一次。
+                return [{"label": "cola", "confidence": 0.9}]
             def finish_recognition(self): events.append(("finish_recognition",))
             def grasp_station_once(self, station, *_args, guard, **_kwargs):
                 guard()
@@ -59,25 +57,15 @@ class TeammateMergeTests(unittest.TestCase):
             lowered = False
             def travel(self): pass
             def prepare(self, station): pass
-        announcements = CompetitionAnnouncements(
-            speaker=lambda text: events.append(("speak", text)) or True
-        )
-        try:
+        with patch.object(main, "speak_blocking", side_effect=lambda text: events.append(("speak", text)) or True):
             result = main.run_competition(config, args, navigator_factory=lambda _: nav,
-                                         scanner_factory=lambda *_: Scanner(), rail_factory=Rail,
-                                         announcements=announcements)
-        finally:
-            announcements.close(wait=True)
+                                         scanner_factory=lambda *_: Scanner(), rail_factory=Rail)
         self.assertLess(events.index(("transport", "LM1")), events.index(("nav", "LM2")))
         self.assertIn(("scan", "LM6", "LM6", 6), events)
         self.assertIn(("grasp", "LM6", "LM6"), events)
         self.assertLess(events.index(("finish_recognition",)), events.index(("grasp", "LM6", "LM6")))
-        scan_stations = [e[1] for e in events if e[0] == "scan"]
-        self.assertEqual([e[1] for e in events if e[0] == "speak"],
-                         ["识别到可乐"] * len(scan_stations))
+        self.assertEqual(len([e for e in events if e[0] == "speak"]), 1)
         self.assertEqual(result["announced"], ["cola"])
-        self.assertEqual(result["announced_by_station"],
-                         {station: ["cola"] for station in scan_stations})
 
 
 

@@ -1,0 +1,86 @@
+[
+  {
+    "file": "app/main.py",
+    "previously_existed": true,
+    "before_sha256": "18EF0D24F79B9A501FBAF0DAB3F43A51B8C3873C46C59A6461B188DDA5FAAB13",
+    "after_sha256": "6CF10D5B84EA76208C2AA4B698FDC2EA52A697842C72A97CBF76DD303F585656"
+  },
+  {
+    "file": "modules/audio/__init__.py",
+    "previously_existed": true,
+    "before_sha256": "753349EAC35405B6A149D653DFD0FD7076D7DF7E6E9BCD2336C1359C54897A37",
+    "after_sha256": "E6D4D317AE9273199DDD01D501F564653AC4B7E3F90CB6B8FE34178A9134B90B"
+  },
+  {
+    "file": "modules/audio/chat.py",
+    "previously_existed": true,
+    "before_sha256": "6CAC2AE2F1BF6F003CA258C3431B68C35A17E9F7E4F4606C24B0A8D2D2AF97AE",
+    "after_sha256": "F8286BCCC17CB735356EBCF7B52F3AAA03DA471FA70FA425D0980D7773647836"
+  },
+  {
+    "file": "modules/audio/speech.py",
+    "previously_existed": false,
+    "before_sha256": null,
+    "after_sha256": "158973A920E0DEC217D801645F32DFDCE6600CA32DB96F2F9BB77C7AE6A131A2"
+  },
+  {
+    "file": "modules/audio/speech_utils.py",
+    "previously_existed": false,
+    "before_sha256": null,
+    "after_sha256": "32EFF8724AE21540BD654ABF894E5791AFC12BFB7F15345FC7FA8A16AF17D68A"
+  },
+  {
+    "file": "tools/review_speech.py",
+    "previously_existed": false,
+    "before_sha256": null,
+    "after_sha256": "874B17F3F57F93A5B1695C4C1E27C5F0B3C13E27D8E387D1816A0DAC8C1F54D2"
+  },
+  {
+    "file": "tests/test_competition_retry_queue.py",
+    "previously_existed": true,
+    "before_sha256": "EDD637C45F7E60B8B73B65F9B3AF45282C5FEF040F42F16C7699FE2F2A987A41",
+    "after_sha256": "3E30F7907BC091A684D18926CBEFFE33016189B1671EFC04D73F96566815B5EC"
+  },
+  {
+    "file": "tests/test_latest_multicamera_merge.py",
+    "previously_existed": true,
+    "before_sha256": "CF195BE1C3693764DF0A9BB5ED7741068C1370D0B987D251FCF8557C078AD845",
+    "after_sha256": "6BD48A342B6D5550DBD5107FAE6FF95CC8821D7E249C7C36FB48B5CFE451BDC8"
+  },
+  {
+    "file": "tests/test_multicamera_recognition.py",
+    "previously_existed": true,
+    "before_sha256": "0F635FBA9AC6BA8B77F51FBC143A4295F2E9F17E26A6AE1090D8AEED9B65E27A",
+    "after_sha256": "76C3504F648B60AEA691D9202D0DE86319269AFCC12A62BB254D8E91A4637947"
+  },
+  {
+    "file": "tests/test_speech_audio.py",
+    "previously_existed": false,
+    "before_sha256": null,
+    "after_sha256": "F3689A9A338E5FDA6A087DB2E79221032F67A05E8705B41751E8C264990DB287"
+  },
+  {
+    "file": "tests/test_speech_policy.py",
+    "previously_existed": false,
+    "before_sha256": null,
+    "after_sha256": "BE375A6495915EBEE4090EA0DE97E4AB45E642CFFC4B77160D076DC6A783849C"
+  },
+  {
+    "file": "tests/test_speech_workflow.py",
+    "previously_existed": false,
+    "before_sha256": null,
+    "after_sha256": "734E1ABF280910FAC71EBB7F2FE1A89E9E64D4E72C694A055D8CF61A87AA23A4"
+  },
+  {
+    "file": "requirements-speech.txt",
+    "previously_existed": false,
+    "before_sha256": null,
+    "after_sha256": "6CC38768765BB22536D564D6F9147B5E301D3547D008F408B699D461FD278845"
+  },
+  {
+    "file": "07_语音播报使用说明.md",
+    "previously_existed": false,
+    "before_sha256": null,
+    "after_sha256": "AEDC92EDF3FA16CC46792FBAC1F6D974C3CF2562CAB133FFB0783FDD6886A0C3"
+  }
+]

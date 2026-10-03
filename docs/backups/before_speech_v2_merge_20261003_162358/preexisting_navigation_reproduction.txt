@@ -1,0 +1,25 @@
+test_dynamic_block_returns_to_previous_task_point (test_task.TaskTests.test_dynamic_block_returns_to_previous_task_point) ... [导航] 受阻等待，持续受阻取消并确认停止；无自动回退；底盘原生安全停车仍须实测
+[受阻] blocked=True，is_stop=False；最多等待 10.0s，不回退、不重新发车
+[导航] LM1 -> LM2，task_status=2
+[导航] LM1 -> LM2，task_status=4
+[取消] 已收到取消请求响应，正在核对任务状态和实际停止上报
+[停止确认] 任务已不在执行且连续上报静止；导航安全锁保持，禁止自动发车
+FAIL
+
+======================================================================
+FAIL: test_dynamic_block_returns_to_previous_task_point (test_task.TaskTests.test_dynamic_block_returns_to_previous_task_point)
+----------------------------------------------------------------------
+modules.navigation.dynamic_obstacle_manager.DynamicObstacleTimeout: 导航到 LM2 超时
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "D:\robocup_embody\tests\test_task.py", line 351, in test_dynamic_block_returns_to_previous_task_point
+    with self.assertRaisesRegex(TimeoutError, "已返回上一任务点 LM1"):
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: "已返回上一任务点 LM1" does not match "导航到 LM2 超时"
+
+----------------------------------------------------------------------
+Ran 1 test in 0.899s
+
+FAILED (failures=1)

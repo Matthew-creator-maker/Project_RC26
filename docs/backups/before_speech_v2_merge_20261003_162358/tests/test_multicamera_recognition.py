@@ -14,7 +14,6 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 
 from app import main
-from modules.audio.speech import CompetitionAnnouncements
 from modules.perception.recognition_camera import RecognitionCameraSwitcher
 from modules.perception.recognition_config import RecognitionSettings, display_enabled, validate_display
 from modules.perception.recognition_service import ConsecutiveLabelTracker, RecognitionService, RecognitionWindow
@@ -332,45 +331,30 @@ class PhaseTests(unittest.TestCase):
             def prepare(self, _station): pass
         cfg = {"navigation": {}, "competition": {
             "scan_route": ["LM2", "LM9"], "grasp_priority": ["LM2"], "home_station": "LM2",
-            # 此测试使用独立的模拟路线，不继承实机默认 LM6 -> LM15 映射。
-            "scan_nav_stations": {},
         }}
         args = SimpleNamespace(execute=True, confirm_calibration=True, navigation_only=False,
                                scan_seconds=0.05, match_seconds=480, grasp_timeout_seconds=1)
         scanner = Scanner()
-        announcements = CompetitionAnnouncements(
-            speaker=lambda text: events.append(("speak", text)) or True
-        )
-        try:
+        with patch.object(main, "speak_blocking", side_effect=lambda text: events.append(("speak", text)) or True):
             result = main.run_competition(cfg, args, navigator_factory=lambda _: Navigator(),
-                                         scanner_factory=lambda *_: scanner, rail_factory=Rail,
-                                         announcements=announcements)
-        finally:
-            announcements.close(wait=True)
+                                         scanner_factory=lambda *_: scanner, rail_factory=Rail)
         self.assertEqual([station for kind, station in events if kind == "scan"], ["LM2", "LM9"])
         self.assertEqual([station for kind, station in events if kind == "grasp"], ["LM2", "LM2"])
         self.assertLess(events.index(("scan", "LM9")), events.index(("grasp", "LM2")))
         self.assertLess(events.index(("finish_scan", None)), events.index(("grasp", "LM2")))
-        scan_stations = [station for kind, station in events if kind == "scan"]
-        self.assertEqual([text for kind, text in events if kind == "speak"],
-                         ["识别到可乐"] * len(scan_stations))
+        self.assertEqual(len([item for item in events if item[0] == "speak"]), 1)
         self.assertEqual(result["announced"], ["cola"])
-        self.assertEqual(result["announced_by_station"],
-                         {station: ["cola"] for station in scan_stations})
 
     def test_exit_point_cannot_accidentally_be_recognition_point(self):
         with self.assertRaisesRegex(ValueError, "exit_station"):
             main.competition_plan({"competition": {"scan_route": ["LM2", "LM8", "LM9"]}})
 
     def test_grasp_only_station_can_still_be_retried(self):
-        plan = main.competition_plan({"competition": {"scan_route": ["LM2", "LM9"],
-                                     "grasp_priority": ["LM3", "LM2"],
-                                     "scan_nav_stations": {}}})
+        plan = main.competition_plan({"competition": {"scan_route": ["LM2", "LM9"], "grasp_priority": ["LM3", "LM2"]}})
         self.assertEqual(plan.grasp_retry_route, ("LM2", "LM3"))
 
     def test_preview_never_constructs_hardware(self):
-        cfg = {"competition": {"scan_route": ["LM2", "LM9"], "grasp_priority": ["LM2"],
-                               "scan_nav_stations": {}}}
+        cfg = {"competition": {"scan_route": ["LM2", "LM9"], "grasp_priority": ["LM2"]}}
         def forbidden(*_args):
             self.fail("preview created hardware")
         args = main.build_parser().parse_args([])
