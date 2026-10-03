@@ -1,0 +1,6 @@
+{
+  "real_child_start_health_reuse_cleanup": true,
+  "initial_closed_port_probe_mocked_due_to_local_network_policy": true,
+  "cache_untouched": true,
+  "actual_tts_or_player_started": false
+}

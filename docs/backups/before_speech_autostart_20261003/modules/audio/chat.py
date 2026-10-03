@@ -26,8 +26,6 @@ from fastapi import Body, FastAPI, HTTPException, Response
 
 from modules.audio.speech_utils import (
     MAX_AUDIO_BYTES,
-    TTS_SERVICE_ID,
-    TTS_PROTOCOL,
     cache_filename,
     is_probably_mp3,
     read_valid_mp3,
@@ -40,12 +38,6 @@ VOICE_DEFAULT = "zh-CN-XiaoxiaoNeural"
 AUDIO_DIR = Path(__file__).resolve().parent / "audio_cache" / "tts_service"
 app = FastAPI(title="RoboCup 物品中文播报 TTS")
 _cache_locks: dict[str, asyncio.Lock] = {}
-
-
-@app.get("/health")
-async def health() -> dict:
-    """入口只读检查：不合成音频、不创建缓存、不访问外网。"""
-    return {"service": TTS_SERVICE_ID, "protocol": TTS_PROTOCOL, "pid": os.getpid()}
 
 
 def speed_to_rate(speed: float) -> str:
@@ -105,5 +97,4 @@ async def speech(
 
 
 if __name__ == "__main__":
-    # 本任务的客户端都在同一台机器人上；只监听本机，避免向局域网开放接口。
-    uvicorn.run(app, host="127.0.0.1", port=8002)
+    uvicorn.run(app, host="0.0.0.0", port=8002)
