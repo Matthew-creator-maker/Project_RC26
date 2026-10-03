@@ -345,8 +345,14 @@ def execute_prelocalized_grasp(
         if not ok:
             raise RuntimeError(f"{name}未通过工作空间检查: {reason}")
 
+    retreat = config.get("grasp_test", {}).get("retreat_after_grasp", False)
+    if type(retreat) is not bool:
+        raise ValueError("grasp_test.retreat_after_grasp 必须是布尔值")
     validate_motion_safety(arm, poses, config)
-    print("执行：过渡点 → 松爪 → 接近 → 夹紧 → 撤回。", flush=True)
+    if retreat:
+        print("执行：过渡点 → 松爪 → 接近 → 夹紧 → 撤回预抓取位 → 初始/运输位姿。", flush=True)
+    else:
+        print("执行：过渡点 → 松爪 → 接近 → 夹紧 → 初始/运输位姿。", flush=True)
     try:
         action(lambda: arm.movej_p(poses["transition"]))
         action(lambda: arm.open_gripper(config))
@@ -357,7 +363,9 @@ def execute_prelocalized_grasp(
             guard()
             time.sleep(0.1)
 
-        action(lambda: arm.movel(poses["transition"]))
+        if retreat:
+            action(lambda: arm.movel(poses["transition"]))
+
     except BaseException:
         arm.stop_best_effort()
         raise
@@ -369,6 +377,7 @@ def execute_prelocalized_grasp(
         "xyz_base_m": xyz_base.tolist(),
         "result": "grasp_held",
         "holding_verified": False,
+        "retreated_to_transition": retreat,
     }
 
 
@@ -438,7 +447,10 @@ def run_prepared(args, prepared, guard=None, arm=None):
             return {**result, "result": "grasp_preview", "poses": poses}
 
         validate_motion_safety(arm, poses, config)
-        print("执行：过渡点 → 松爪 → 接近 → 夹紧 → 撤回。", flush=True)
+        if args.action == "carry" and not owns_arm:
+            print("执行：过渡点 → 松爪 → 接近 → 夹紧；随后由任务主流程直接回初始/运输位姿。", flush=True)
+        else:
+            print("执行：过渡点 → 松爪 → 接近 → 夹紧 → 撤回。", flush=True)
         action(lambda: arm.movej_p(poses["transition"]))
         action(lambda: arm.open_gripper(config))
         action(lambda: arm.movel(poses["final"]))
@@ -447,7 +459,9 @@ def run_prepared(args, prepared, guard=None, arm=None):
         for _ in range(10):
             guard()
             time.sleep(0.1)
-        action(lambda: arm.movel(poses["transition"]))
+        # 任务主流程在 carry 返回后直接 movej 到运输位；独立执行和 release 保留原撤回。
+        if args.action == "release" or owns_arm:
+            action(lambda: arm.movel(poses["transition"]))
 
         if args.action == "release":
             # LM3：为了“放下”而不是从撤回高度直接掉落，再回到原抓取高度松爪后撤回。

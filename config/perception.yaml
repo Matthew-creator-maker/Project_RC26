@@ -61,7 +61,7 @@ arm:
 
   gripper_release_speed: 500  #原先参数500
   gripper_speed: 300  #原先参数200
-  gripper_force: 600 #先按厂家示例使用较低力控阈值；实机单独验证夹持后再调整
+  gripper_force: 800 #先按厂家示例使用较低力控阈值；实机单独验证夹持后再调整
   gripper_timeout_seconds: 10
 
 grasp_test:
@@ -153,7 +153,7 @@ height_profiles:
 
   table_0_8m:
     # 【LM点分配】当前沿用旧配置：LM2、LM5、LM6。
-    stations: [LM2, LM5, LM6]
+    stations: [LM4]
     enabled: true
     nominal_height_m: 0.8
     rail_position_inc: 0  # 当前原代码非地面档使用的导轨行驶/上方位置
@@ -165,6 +165,7 @@ height_profiles:
     transition_tool_offset_m: [0.0, 0.0, -0.10]
   shelf_1_2m:
     # 【LM点分配】属于 1.2m 高层的 LM 点填在这里。
+    retreat_after_grasp: true  # 柜子抓取夹紧后先撤回预抓取位；其他高度默认不撤回
     stations: []
     enabled: false  # TODO 酒架/高层实机标定后改 true
     nominal_height_m: 1.2

@@ -377,6 +377,11 @@ class CompetitionScanner:
                     profile[key], length, f"height_profiles.{profile_name}.{key}"
                 )
         station_cfg["arm"] = station_arm
+        retreat = profile.get("retreat_after_grasp", False)
+        if type(retreat) is not bool:
+            raise ValueError(f"height_profiles.{profile_name}.retreat_after_grasp 必须是布尔值")
+        station_cfg["grasp_test"] = {**self.vision_config.get("grasp_test", {}),
+                                     "retreat_after_grasp": retreat}
         return station_cfg
 
     def _observation_poses_for_station(self, station: str) -> list[list[float]]:
@@ -980,7 +985,11 @@ def run_competition(
                     label = str(result.get("target", "")).strip() or "unknown"
                     round_detected_object = True
 
-                    # 成功夹住后先回运输位，再让底盘去 LM7。
+                    # 柜子已撤回预抓取位；其他高度从抓取点直接回运输位。
+                    if result.get("retreated_to_transition", False):
+                        print(f"[抓取回位] {station}: 已撤回预抓取位，返回初始/运输位姿。", flush=True)
+                    else:
+                        print(f"[抓取回位] {station}: 夹紧完成，直接返回初始/运输位姿。", flush=True)
                     scanner.transport(lambda s=station: navigator.assert_at(s))
 
                 except TimeoutError as exc:
@@ -1236,6 +1245,7 @@ def run_task(
         results["LM5"] = lm5_program.run(
             _point(config, "task_lm5"), guard=lambda: navigator.assert_at("LM5")
         )
+        print("[抓取回位] LM5: 夹紧完成，直接返回初始/运输位姿。", flush=True)
         lm5_program.transport(lambda: navigator.assert_at("LM5"))
         _safe_close(lm5_program)
         lm5_program = None
