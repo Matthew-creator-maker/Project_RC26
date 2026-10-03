@@ -377,6 +377,8 @@ class CompetitionScanner:
                 f"height_profiles.{profile_name}.observation_points[{observation_index}]."
                 "approach_waypoints_joints_deg 必须是关节角列表"
             )
+        if raw_waypoints and all(not isinstance(item, (list, tuple)) for item in raw_waypoints):
+            raw_waypoints = [raw_waypoints]  # 单组关节角也允许直接写成 [J1, ..., J6]。
         station_arm["approach_waypoints_joints_deg"] = [
             self.module.finite_vector(
                 joints, 6,
@@ -463,7 +465,19 @@ class CompetitionScanner:
         self._ensure_arm(guard)
 
         # 所有 LOW_STATIONS 共用同一套地面识别/抓取参数；其他站点继续使用原参数。
-        station_vision_config = self._vision_config_for_station(station, observation_index)
+        # 第 1 个识别点保留原单参数调用方式；其余识别点按各自索引取绕行路径。
+        station_vision_config = (
+            self._vision_config_for_station(station)
+            if observation_index == 1 else
+            self._vision_config_for_station(station, observation_index)
+        )
+        waypoints = station_vision_config.get("arm", {}).get("approach_waypoints_joints_deg", [])
+        print(
+            f"[抓取配置] 当前读取: {getattr(self, 'config', {}).get('perception_config', '默认视觉配置')}；"
+            f"{station} 识别点 {observation_index} 关节过渡点: "
+            f"{waypoints}",
+            flush=True,
+        )
         if observation_pose is None:
             observation_pose = self._observation_pose_for_station(station)
 

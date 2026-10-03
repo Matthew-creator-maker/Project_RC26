@@ -155,15 +155,24 @@ def validate_motion_safety(
     arm.validate_pose_ik(poses["final"], config, "最终抓取点")
 
 
-def approach_waypoints(config: Dict[str, Any]) -> List[List[float]]:
-    """识别位到预抓取位之间的关节过渡点，单位为度，按配置顺序执行。"""
-    values = config.get("arm", {}).get("approach_waypoints_joints_deg", [])
+def normalize_approach_waypoints(values, name: str) -> List[List[float]]:
+    """兼容单组 [J1..J6] 和多组 [[J1..J6], ...]，内部统一成多组。"""
     if not isinstance(values, list):
-        raise ValueError("arm.approach_waypoints_joints_deg 必须是关节角列表")
+        raise ValueError(f"{name} 必须是关节角列表")
+    if values and all(not isinstance(item, (list, tuple)) for item in values):
+        return [finite_vector(values, 6, name)]
     return [
-        finite_vector(joints, 6, f"arm.approach_waypoints_joints_deg[{index}]")
+        finite_vector(joints, 6, f"{name}[{index}]")
         for index, joints in enumerate(values, 1)
     ]
+
+
+def approach_waypoints(config: Dict[str, Any]) -> List[List[float]]:
+    """识别位到预抓取位之间的关节过渡点，单位为度，按配置顺序执行。"""
+    return normalize_approach_waypoints(
+        config.get("arm", {}).get("approach_waypoints_joints_deg", []),
+        "arm.approach_waypoints_joints_deg",
+    )
 
 
 def move_to_pregrasp(arm, poses, config, action):
