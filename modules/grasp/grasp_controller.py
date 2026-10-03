@@ -155,6 +155,27 @@ def validate_motion_safety(
     arm.validate_pose_ik(poses["final"], config, "最终抓取点")
 
 
+def approach_waypoints(config: Dict[str, Any]) -> List[List[float]]:
+    """识别位到预抓取位之间的关节过渡点，单位为度，按配置顺序执行。"""
+    values = config.get("arm", {}).get("approach_waypoints_joints_deg", [])
+    if not isinstance(values, list):
+        raise ValueError("arm.approach_waypoints_joints_deg 必须是关节角列表")
+    return [
+        finite_vector(joints, 6, f"arm.approach_waypoints_joints_deg[{index}]")
+        for index, joints in enumerate(values, 1)
+    ]
+
+
+def move_to_pregrasp(arm, poses, config, action):
+    """先绕行关节过渡点，再由当前构型预检并进入目标相关的预抓取位。"""
+    for index, joints in enumerate(approach_waypoints(config), 1):
+        print(f"[抓取绕行] 关节过渡点 {index}: {joints}°", flush=True)
+        action(lambda joints=joints: arm.movej(joints))
+    # 过渡后重新以当前关节构型为 IK 参考，防止沿用识别位的逆解分支。
+    validate_motion_safety(arm, poses, config)
+    action(lambda: arm.movej_p(poses["transition"]))
+
+
 def require_execution_safety(
     args: argparse.Namespace,
     config: Dict[str, Any],
@@ -202,6 +223,7 @@ def validate_config(config, execute=False, recognize_only=False, action="carry")
                 or (value < 0 if allow_zero else value <= 0)):
             raise ValueError(f"{name} 不是有效时间")
     finite_vector(arm_cfg.get("observation_joints_deg"), 6, "arm.observation_joints_deg")
+    approach_waypoints(config)
     for key in ("grasp_orientation_rad", "final_tool_offset_m", "transition_tool_offset_m"):
         finite_vector(arm_cfg.get(key), 3, "arm." + key)
     camera_to_end_matrix(config)
@@ -348,13 +370,13 @@ def execute_prelocalized_grasp(
     retreat = config.get("grasp_test", {}).get("retreat_after_grasp", False)
     if type(retreat) is not bool:
         raise ValueError("grasp_test.retreat_after_grasp 必须是布尔值")
-    validate_motion_safety(arm, poses, config)
+    approach_waypoints(config)  # 在发送任何抓取运动指令前校验整条关节过渡路径。
     if retreat:
         print("执行：过渡点 → 松爪 → 接近 → 夹紧 → 撤回预抓取位 → 初始/运输位姿。", flush=True)
     else:
         print("执行：过渡点 → 松爪 → 接近 → 夹紧 → 初始/运输位姿。", flush=True)
     try:
-        action(lambda: arm.movej_p(poses["transition"]))
+        move_to_pregrasp(arm, poses, config, action)
         action(lambda: arm.open_gripper(config))
         action(lambda: arm.movel(poses["final"]))
         action(lambda: arm.close_gripper(config))
@@ -446,12 +468,12 @@ def run_prepared(args, prepared, guard=None, arm=None):
         if not args.execute:
             return {**result, "result": "grasp_preview", "poses": poses}
 
-        validate_motion_safety(arm, poses, config)
+        approach_waypoints(config)
         if args.action == "carry" and not owns_arm:
             print("执行：过渡点 → 松爪 → 接近 → 夹紧；随后由任务主流程直接回初始/运输位姿。", flush=True)
         else:
             print("执行：过渡点 → 松爪 → 接近 → 夹紧 → 撤回。", flush=True)
-        action(lambda: arm.movej_p(poses["transition"]))
+        move_to_pregrasp(arm, poses, config, action)
         action(lambda: arm.open_gripper(config))
         action(lambda: arm.movel(poses["final"]))
         action(lambda: arm.close_gripper(config))

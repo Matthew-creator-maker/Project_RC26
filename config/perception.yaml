@@ -49,6 +49,8 @@ arm:
   # 第 6 轴原值 -243.399° 与 116.601° 相差整整 360°，末端朝向等效。
   # 运输位第 6 轴为 170°；采用邻近的等效角，避免进出观测位时多转一整圈。
   observation_joints_deg: [5.03, 96.214, 36.861, -130.156, -104.051, 116.601]
+  # 独立运行 grasp_controller.py 时使用；比赛流程使用下方各识别点自己的关节过渡点。
+  approach_waypoints_joints_deg: []
   joint_speed: 20   #原先是5
   cartesian_speed: 20 #原先是5
   observation_settle_seconds: 1.5
@@ -94,6 +96,10 @@ grasp_test:
 #    例如 stations: [LM3, LM4]，表示 LM3/LM4 都使用这一高度。
 # 2) rail_position_inc：该高度的导轨编码位置，必须实机标定。
 # 3) observation_points：该高度可放 1~N 个机械臂观察姿态；增删列表项即可。
+#    每个识别点的 approach_waypoints_joints_deg 按顺序填写 0~N 组实测 [J1,J2,J3,J4,J5,J6]（度）。
+#    抓取路径：识别位 -> 关节过渡点 1 -> ... -> 动态计算的预抓取位 -> 抓取点。
+#    [] 表示不绕行，仍会直接去预抓取位；实机避障前必须填入并逐段验证关节角。
+#    注意 movej 两点之间的轨迹也可能碰撞，不能仅凭过渡点本身安全判断整条路径。
 # 4) grasp_orientation_rad / 两个 offset：该高度抓取姿态。
 # 注意：同一个 LM 只能出现在一个高度的 stations 中；重复分配会直接报错。
 # 未实测的高度默认 enabled: false，禁止带着占位参数上实机。
@@ -107,8 +113,11 @@ height_profiles:
     rail_position_inc: -7000000
     observation_points:
       - joints_deg: [57.586, 112.896, 33.269, -121.425, -104.002, 116.63]
+        # 替换 [] 为实测关节角列表，例如下一行格式（不要照搬示意值）：
+        # approach_waypoints_joints_deg: [[J1, J2, J3, J4, J5, J6], [J1, J2, J3, J4, J5, J6]]
       # 增加地面第2识别点：取消下一行注释并填实测关节角
       # - joints_deg: [J1, J2, J3, J4, J5, J6]
+      #   approach_waypoints_joints_deg: []  # 第2识别点单独填写
     grasp_orientation_rad: [1.719, 0.384, 1.356]
     final_tool_offset_m: [0.0, 0.0, 0.05]
     transition_tool_offset_m: [0.0, 0.0, -0.10]
@@ -122,6 +131,7 @@ height_profiles:
     rail_position_inc: -6000000  # TODO 填 0.5m 高度对应导轨 inc
     observation_points:
       - joints_deg: [5.03, 96.214, 36.861, -130.156, -104.051, 116.601]  # TODO 实测
+        approach_waypoints_joints_deg: [112.73,60.71,128.993,23.455,-108.179,85.558]  # 填此识别点绕行用的实测关节角（度）
     grasp_orientation_rad: [1.514, 0.384, -0.070]  # TODO 实测
     final_tool_offset_m: [0.0, -0.01, 0.05]
     transition_tool_offset_m: [0.0, 0.0, -0.10]
@@ -134,6 +144,7 @@ height_profiles:
     rail_position_inc: -5500000  # TODO 实测
     observation_points:
       - joints_deg: [5.03, 96.214, 36.861, -130.156, -104.051, 116.601]  # TODO 实测
+        approach_waypoints_joints_deg: [112.73,60.71,128.993,23.455,-108.179,85.558]  # 填此识别点绕行用的实测关节角（度）
     grasp_orientation_rad: [1.514, 0.384, -0.070]
     final_tool_offset_m: [0.0, -0.01, 0.05]
     transition_tool_offset_m: [0.0, 0.0, -0.10]
@@ -146,7 +157,9 @@ height_profiles:
     rail_position_inc: -4500000  # TODO 实测
     observation_points:
       - joints_deg: [5.03, 96.214, 36.861, -130.156, -104.051, 116.601]  # TODO 实测
+        approach_waypoints_joints_deg: [112.73,60.71,128.993,23.455,-108.179,85.558]  # 填此识别点绕行用的实测关节角（度）
       # - joints_deg: [J1, J2, J3, J4, J5, J6]  # 可继续增加识别点
+      #   approach_waypoints_joints_deg: []
     grasp_orientation_rad: [1.514, 0.384, -0.070]
     final_tool_offset_m: [0.0, -0.01, 0.05]
     transition_tool_offset_m: [0.0, 0.0, -0.10]
@@ -159,6 +172,7 @@ height_profiles:
     rail_position_inc: 0  # 当前原代码非地面档使用的导轨行驶/上方位置
     observation_points:
       - joints_deg: [5.03, 96.214, 36.861, -130.156, -104.051, 116.601]
+        approach_waypoints_joints_deg: [112.73,60.71,128.993,23.455,-108.179,85.558]  # 填此识别点绕行用的实测关节角（度）
       # - joints_deg: [J1, J2, J3, J4, J5, J6]  # 0.8m 第2识别点预留
     grasp_orientation_rad: [1.514, 0.384, -0.070]
     final_tool_offset_m: [0.0, -0.01, 0.05]
@@ -172,6 +186,7 @@ height_profiles:
     rail_position_inc: +3000000  # TODO 实测；不要直接使用占位值
     observation_points:
       - joints_deg: [5.03, 96.214, 36.861, -130.156, -104.051, 116.601]  # TODO 实测
+        approach_waypoints_joints_deg: [112.73,60.71,128.993,23.455,-108.179,85.558]  # 填此识别点绕行用的实测关节角（度）
     grasp_orientation_rad: [1.514, 0.152, -0.070]  # TODO 实测
     final_tool_offset_m: [0.0, -0.01, 0.05]
     transition_tool_offset_m: [0.0, 0.0, -0.10]

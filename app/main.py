@@ -348,7 +348,7 @@ class CompetitionScanner:
             raise ValueError(f"height_profiles.{profile_name}.rail_position_inc 必须是整数")
         return value
 
-    def _vision_config_for_station(self, station: str) -> dict[str, Any]:
+    def _vision_config_for_station(self, station: str, observation_index: int = 1) -> dict[str, Any]:
         """把当前高度档的抓取姿态覆盖到通用视觉配置。"""
         profile_name, profile = self._height_profile_for_station(station)
         arm_cfg = self.vision_config.get("arm", {})
@@ -363,6 +363,28 @@ class CompetitionScanner:
                 station_arm[key] = self.module.finite_vector(
                     profile[key], length, f"height_profiles.{profile_name}.{key}"
                 )
+        # 每个识别点可以有不同的绕行关节路径；独立抓取脚本使用 arm 下的默认路径。
+        points = profile.get("observation_points", [])
+        if not isinstance(points, list) or not 1 <= observation_index <= len(points):
+            raise ValueError(f"height_profiles.{profile_name}.observation_points 索引无效")
+        selected = points[observation_index - 1]
+        raw_waypoints = (arm_cfg.get("approach_waypoints_joints_deg", [])
+                         if profile_name == "legacy" else
+                         selected.get("approach_waypoints_joints_deg", [])
+                         if isinstance(selected, dict) else [])
+        if not isinstance(raw_waypoints, list):
+            raise ValueError(
+                f"height_profiles.{profile_name}.observation_points[{observation_index}]."
+                "approach_waypoints_joints_deg 必须是关节角列表"
+            )
+        station_arm["approach_waypoints_joints_deg"] = [
+            self.module.finite_vector(
+                joints, 6,
+                f"height_profiles.{profile_name}.observation_points[{observation_index}]."
+                f"approach_waypoints_joints_deg[{index}]",
+            )
+            for index, joints in enumerate(raw_waypoints, 1)
+        ]
         station_cfg["arm"] = station_arm
         retreat = profile.get("retreat_after_grasp", False)
         if type(retreat) is not bool:
@@ -441,7 +463,7 @@ class CompetitionScanner:
         self._ensure_arm(guard)
 
         # 所有 LOW_STATIONS 共用同一套地面识别/抓取参数；其他站点继续使用原参数。
-        station_vision_config = self._vision_config_for_station(station)
+        station_vision_config = self._vision_config_for_station(station, observation_index)
         if observation_pose is None:
             observation_pose = self._observation_pose_for_station(station)
 
