@@ -55,7 +55,7 @@ arm:
   # RealMan 位姿采用 [x,y,z,rx,ry,rz]；此处旋转按 ZYX 内旋、弧度解释。
   grasp_orientation_rad: [1.514, 0.152, -0.070]
   # 完全沿用 test_0914.py 的工具坐标偏移。
-  final_tool_offset_m: [0.0, 0.0, 0.04]   #原先参数[0.0, 0.0, 0.04]
+  final_tool_offset_m: [0.0, 0.0, 0.04]   #原先参数[0.0, 0.0, 0.04]，（左右，高度，前后）
   transition_tool_offset_m: [0.0, 0.0, -0.10] #原先参数[0.0, 0.0, -0.15]
 
 
