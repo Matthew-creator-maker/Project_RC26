@@ -1,0 +1,37 @@
+[
+  {
+    "file": "run.py",
+    "before_sha256": "8dd17fdf4642680c91864d83ed1170cf3a9c71de028ebebfbba13bdb72d6f411",
+    "after_sha256": "99ecfe2cf60ae1291e519bfbc293ba3038823f5841db94332ef2666e1ad65989"
+  },
+  {
+    "file": "modules/audio/speech_utils.py",
+    "before_sha256": "32eff8724ae21540bd654abf894e5791afc12bfb7f15345fc7fa8a16af17d68a",
+    "after_sha256": "4750c58dbc6dac7cadd872a39236f07365f73cc8c81cf97aa726ba90c808703b"
+  },
+  {
+    "file": "modules/audio/chat.py",
+    "before_sha256": "f8286bccc17cb735356ebcf7b52f3aaa03da471fa70fa425d0980d7773647836",
+    "after_sha256": "7f502668063de8fa614d388e960b944f48ccea72822291c95dcee52833b9b186"
+  },
+  {
+    "file": "tests/test_speech_audio.py",
+    "before_sha256": "f3689a9a338e5fda6a087db2e79221032f67a05e8705b41751e8c264990db287",
+    "after_sha256": "97bf09e25f5708b6102d89197fdb84034f037c454bbd35dc8401a134093aee5e"
+  },
+  {
+    "file": "tests/test_speech_runtime.py",
+    "before_sha256": null,
+    "after_sha256": "fc1e3bf0f4b5b4832565adcbcc599bc9df14cc433d4cab96cd3feef5c13b0780"
+  },
+  {
+    "file": "07_语音播报使用说明.md",
+    "before_sha256": "aedc92edf3fa16cc46792fbac1f6d974c3cf2562cab133ffb0783fdd6886a0c3",
+    "after_sha256": "6c23c8c6eac5922d5cf273b999f70bbddf9d94a308c1b77030c14cb2fbffc6f1"
+  },
+  {
+    "file": "08_一键启动语音服务.md",
+    "before_sha256": null,
+    "after_sha256": "ef6bc2060fb94a657eb0c69a4d05af910e17db55e8819b173574254ecc51c3f2"
+  }
+]

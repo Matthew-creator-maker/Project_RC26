@@ -1,0 +1,15 @@
+{
+  "run.py": "8dd17fdf4642680c91864d83ed1170cf3a9c71de028ebebfbba13bdb72d6f411",
+  "modules/audio/speech_utils.py": "32eff8724ae21540bd654abf894e5791afc12bfb7f15345fc7fa8a16af17d68a",
+  "modules/audio/chat.py": "f8286bccc17cb735356ebcf7b52f3aaa03da471fa70fa425d0980d7773647836",
+  "tests/test_speech_audio.py": "f3689a9a338e5fda6a087db2e79221032f67a05e8705b41751e8c264990db287",
+  "tests/test_speech_runtime.py": null,
+  "07_\u8bed\u97f3\u64ad\u62a5\u4f7f\u7528\u8bf4\u660e.md": "aedc92edf3fa16cc46792fbac1f6d974c3cf2562cab133ffb0783fdd6886a0c3",
+  "08_\u4e00\u952e\u542f\u52a8\u8bed\u97f3\u670d\u52a1.md": null,
+  "app/main.py": "6cf10d5b84ea76208c2aa4b698fdc2ea52a697842c72a97cbf76dd303f585656",
+  "modules/audio/speech.py": "158973a920e0dec217d801645f32dfdce6600ca32db96f2f9bb77c7ae6a131a2",
+  "modules/audio/__init__.py": "e6d4d317ae9273199ddd01d501f564653ac4b7e3f90cb6b8fe34178a9134b90b",
+  "config/task_config.json": "e1ea2c54e5492182b2139665ef1a4707e2e1c65449990218b86be509a4495f17",
+  "config/perception.yaml": "b2fcd7afcd755f34f727df4b499c70e1f1b6fdc7f6d0db0500cafe63d006f069",
+  "config/recognition.yaml": "11471e6b8b875b7185adbd8436330090230c201e17dcf328b8df87e6235776fa"
+}

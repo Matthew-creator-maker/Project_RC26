@@ -1,0 +1,444 @@
+test_mission_failure_cleans_context_and_restores_signal (new_runtime_tests.EntrypointTests.test_mission_failure_cleans_context_and_restores_signal) ... ok
+test_preview_help_navigation_and_unconfirmed_do_not_start_service (new_runtime_tests.EntrypointTests.test_preview_help_navigation_and_unconfirmed_do_not_start_service) ... usage: test_speech_autostart.py [-h] [--config CONFIG] [--execute]
+                                [--confirm-calibration] [--show | --no-show]
+                                [--navigation-only] [--legacy-demo]
+                                [--scan-seconds SCAN_SECONDS]
+                                [--match-seconds MATCH_SECONDS]
+                                [--exit-reserve-seconds EXIT_RESERVE_SECONDS]
+                                [--grasp-timeout-seconds GRASP_TIMEOUT_SECONDS]
+                                [--grasp-sample-timeout-seconds GRASP_SAMPLE_TIMEOUT_SECONDS]
+
+预建图 LM 点导航 + 先识别播报 + 再抓取运返
+
+options:
+  -h, --help            show this help message and exit
+  --config CONFIG       任务 JSON 配置文件
+  --execute             真实执行底盘/机械臂动作
+  --confirm-calibration
+                        确认当前手眼标定和机械臂安装未改变
+  --show                强制显示识别与抓取画面
+  --no-show             关闭画面，适合无桌面 SSH
+  --navigation-only     只测试第一阶段固定 LM 路线并停在 HOME，不执行视觉/机械臂，也不真正离场
+  --legacy-demo         运行原 LM1->LM7 演示任务；默认运行新的比赛策略
+  --scan-seconds SCAN_SECONDS
+                        每个扫描点识别时长（秒）
+  --match-seconds MATCH_SECONDS
+                        任务总时长（秒）；默认 480 秒，到时停止新增抓取并前往 LM8
+  --exit-reserve-seconds EXIT_RESERVE_SECONDS
+                        兼容旧启动参数；当前策略按 --match-seconds 到时停止新增抓取，不再提前预留离场时间
+  --grasp-timeout-seconds GRASP_TIMEOUT_SECONDS
+                        抓取阶段寻找第一个稳定目标的超时（秒）；默认 8 秒
+  --grasp-sample-timeout-seconds GRASP_SAMPLE_TIMEOUT_SECONDS
+                        锁定目标后收集稳定三维点的超时（秒）；默认 20 秒，stable_samples 仍为 10
+ok
+test_service_failure_prevents_mission (new_runtime_tests.EntrypointTests.test_service_failure_prevents_mission) ... ok
+test_sigterm_uses_exception_for_normal_finally_cleanup (new_runtime_tests.EntrypointTests.test_sigterm_uses_exception_for_normal_finally_cleanup) ... ok
+test_body_failure_preserved_and_child_cleaned (new_runtime_tests.RuntimeTests.test_body_failure_preserved_and_child_cleaned) ... [语音启动] 正在启动本地服务；复用磁盘缓存，不重新预生成。
+[语音启动] 本地服务已就绪。
+[语音清理] 本次启动的服务已关闭；磁盘缓存保留。
+ok
+test_child_exits_before_readiness (new_runtime_tests.RuntimeTests.test_child_exits_before_readiness) ... [语音启动] 正在启动本地服务；复用磁盘缓存，不重新预生成。
+ok
+test_cleanup_warning_does_not_mask_original_error (new_runtime_tests.RuntimeTests.test_cleanup_warning_does_not_mask_original_error) ... [语音启动] 正在启动本地服务；复用磁盘缓存，不重新预生成。
+[语音启动] 本地服务已就绪。
+[语音清理警告] already gone
+ok
+test_conflicting_service_never_terminated (new_runtime_tests.RuntimeTests.test_conflicting_service_never_terminated) ... ok
+test_construction_has_no_process_or_cache_side_effects (new_runtime_tests.RuntimeTests.test_construction_has_no_process_or_cache_side_effects) ... ok
+test_existing_service_preserved_and_proxy_entries_restored (new_runtime_tests.RuntimeTests.test_existing_service_preserved_and_proxy_entries_restored) ... [语音启动] 复用已有匹配服务；退出时保留该服务。
+ok
+test_interrupt_during_startup_also_cleans_child_and_environment (new_runtime_tests.RuntimeTests.test_interrupt_during_startup_also_cleans_child_and_environment) ... [语音启动] 正在启动本地服务；复用磁盘缓存，不重新预生成。
+[语音清理] 本次启动的服务已关闭；磁盘缓存保留。
+ok
+test_missing_dependency_fails_before_spawn (new_runtime_tests.RuntimeTests.test_missing_dependency_fails_before_spawn) ... ok
+test_missing_player_fails_before_process_or_mission (new_runtime_tests.RuntimeTests.test_missing_player_fails_before_process_or_mission) ... ok
+test_own_service_started_with_current_interpreter_and_closed (new_runtime_tests.RuntimeTests.test_own_service_started_with_current_interpreter_and_closed) ... [语音启动] 正在启动本地服务；复用磁盘缓存，不重新预生成。
+[语音启动] 本地服务已就绪。
+[语音清理] 本次启动的服务已关闭；磁盘缓存保留。
+ok
+test_port_race_cannot_be_mistaken_for_own_process (new_runtime_tests.RuntimeTests.test_port_race_cannot_be_mistaken_for_own_process) ... [语音启动] 正在启动本地服务；复用磁盘缓存，不重新预生成。
+[语音清理] 本次启动的服务已关闭；磁盘缓存保留。
+ok
+test_probe_checks_identity_without_proxy (new_runtime_tests.RuntimeTests.test_probe_checks_identity_without_proxy) ... ok
+test_probe_refused_is_absent_but_404_or_timeout_is_not (new_runtime_tests.RuntimeTests.test_probe_refused_is_absent_but_404_or_timeout_is_not) ... ok
+test_slow_child_is_killed_only_after_grace_period (new_runtime_tests.RuntimeTests.test_slow_child_is_killed_only_after_grace_period) ... [语音启动] 正在启动本地服务；复用磁盘缓存，不重新预生成。
+[语音启动] 本地服务已就绪。
+[语音清理] 本次启动的服务已关闭；磁盘缓存保留。
+ok
+test_startup_never_synthesizes_or_modifies_cache (new_runtime_tests.RuntimeTests.test_startup_never_synthesizes_or_modifies_cache) ... [语音启动] 正在启动本地服务；复用磁盘缓存，不重新预生成。
+[语音启动] 本地服务已就绪。
+[语音清理] 本次启动的服务已关闭；磁盘缓存保留。
+ok
+test_startup_timeout_cleans_process (new_runtime_tests.RuntimeTests.test_startup_timeout_cleans_process) ... [语音启动] 正在启动本地服务；复用磁盘缓存，不重新预生成。
+[语音清理] 本次启动的服务已关闭；磁盘缓存保留。
+ok
+test_blank_input_does_not_synthesize (new_audio_tests.ChatServiceTests.test_blank_input_does_not_synthesize) ... ok
+test_changed_voice_or_speed_generates_new_audio (new_audio_tests.ChatServiceTests.test_changed_voice_or_speed_generates_new_audio) ... ok
+test_chinese_protocol_and_cache_reuse (new_audio_tests.ChatServiceTests.test_chinese_protocol_and_cache_reuse) ... ok
+test_client_can_consume_server_response_and_reuse_its_cache (new_audio_tests.ChatServiceTests.test_client_can_consume_server_response_and_reuse_its_cache) ... ok
+test_concurrent_same_text_only_synthesizes_once (new_audio_tests.ChatServiceTests.test_concurrent_same_text_only_synthesizes_once) ... ok
+test_error_response_is_not_saved_as_audio (new_audio_tests.ChatServiceTests.test_error_response_is_not_saved_as_audio) ... ok
+test_health_identifies_service_without_synthesis_or_cache (new_audio_tests.ChatServiceTests.test_health_identifies_service_without_synthesis_or_cache) ... ok
+test_synthesis_failure_returns_502_and_cleans_temporary_files (new_audio_tests.ChatServiceTests.test_synthesis_failure_returns_502_and_cleans_temporary_files) ... ok
+test_construction_does_not_create_cache_or_call_dependencies (new_audio_tests.ObjectVoiceTests.test_construction_does_not_create_cache_or_call_dependencies) ... ok
+test_corrupt_cache_is_replaced (new_audio_tests.ObjectVoiceTests.test_corrupt_cache_is_replaced) ... [语音播报] 识别到洗手液
+ok
+test_empty_text_fails_without_side_effects (new_audio_tests.ObjectVoiceTests.test_empty_text_fails_without_side_effects) ... [语音失败] '  '：播报文字不能为空
+[语音缓存失败] ''：播报文字不能为空
+ok
+test_failed_cached_playback_preserves_cache_without_network (new_audio_tests.ObjectVoiceTests.test_failed_cached_playback_preserves_cache_without_network) ... [语音缓存] 已准备：识别到面包
+[语音播报] 识别到面包
+[语音失败] 未完成播放：识别到面包
+[语音播报] 识别到面包
+ok
+test_http_request_uses_existing_protocol_and_timeout (new_audio_tests.ObjectVoiceTests.test_http_request_uses_existing_protocol_and_timeout) ... ok
+test_import_does_not_request_audio_or_create_directory (new_audio_tests.ObjectVoiceTests.test_import_does_not_request_audio_or_create_directory) ... ok
+test_invalid_synthesis_data_is_not_cached_or_played (new_audio_tests.ObjectVoiceTests.test_invalid_synthesis_data_is_not_cached_or_played) ... [语音播报] 识别到水
+[语音失败] '识别到水'：TTS 返回的数据不是有效的 MP3 开头，拒绝写入缓存
+ok
+test_missing_mpg123_reports_failure_without_subprocess (new_audio_tests.ObjectVoiceTests.test_missing_mpg123_reports_failure_without_subprocess) ... [语音失败] 未找到 mpg123 播放器。
+ok
+test_mpg123_return_code_is_propagated (new_audio_tests.ObjectVoiceTests.test_mpg123_return_code_is_propagated) ... [语音失败] mpg123 退出码：1
+ok
+test_playback_failure_is_bounded_to_once_per_call (new_audio_tests.ObjectVoiceTests.test_playback_failure_is_bounded_to_once_per_call) ... [语音缓存] 已准备：识别到曲奇
+[语音播报] 识别到曲奇
+[语音失败] 未完成播放：识别到曲奇
+[语音播报] 识别到曲奇
+[语音失败] 未完成播放：识别到曲奇
+[语音播报] 识别到乐事薯片
+[语音失败] 未完成播放：识别到乐事薯片
+ok
+test_playback_false_or_exception_never_reports_success (new_audio_tests.ObjectVoiceTests.test_playback_false_or_exception_never_reports_success) ... [语音播报] 识别到饼干
+[语音失败] 未完成播放：识别到饼干
+[语音播报] 识别到薯片
+[语音失败] '识别到薯片'：声卡不可用
+ok
+test_success_requires_real_player_success_and_reuses_cache (new_audio_tests.ObjectVoiceTests.test_success_requires_real_player_success_and_reuses_cache) ... [语音播报] 识别到雪碧
+[语音播报] 识别到雪碧
+ok
+test_synthesis_failure_is_false_without_playing (new_audio_tests.ObjectVoiceTests.test_synthesis_failure_is_false_without_playing) ... [语音播报] 识别到水
+[语音失败] '识别到水'：TTS 不可用
+ok
+test_two_instances_share_playback_lock (new_audio_tests.ObjectVoiceTests.test_two_instances_share_playback_lock) ... [语音播报] 识别到可乐
+[语音播报] 识别到芬达
+ok
+test_warm_cache_does_not_play_or_resynthesize_valid_cache (new_audio_tests.ObjectVoiceTests.test_warm_cache_does_not_play_or_resynthesize_valid_cache) ... [语音缓存] 已准备：识别到洗洁精
+[语音缓存] 已准备：识别到洗洁精
+ok
+test_atomic_write_creates_parent_and_replaces_existing_file (new_audio_tests.SpeechCacheTests.test_atomic_write_creates_parent_and_replaces_existing_file) ... ok
+test_audio_validation_rejects_html_json_and_truncated_data (new_audio_tests.SpeechCacheTests.test_audio_validation_rejects_html_json_and_truncated_data) ... ok
+test_failed_atomic_replace_preserves_existing_cache (new_audio_tests.SpeechCacheTests.test_failed_atomic_replace_preserves_existing_cache) ... ok
+test_id3_metadata_is_skipped_before_frame_check (new_audio_tests.SpeechCacheTests.test_id3_metadata_is_skipped_before_frame_check) ... ok
+test_read_invalid_or_missing_cache_returns_none (new_audio_tests.SpeechCacheTests.test_read_invalid_or_missing_cache_returns_none) ... ok
+test_same_parameters_have_same_safe_filename (new_audio_tests.SpeechCacheTests.test_same_parameters_have_same_safe_filename) ... ok
+test_speed_validation_rejects_invalid_numbers (new_audio_tests.SpeechCacheTests.test_speed_validation_rejects_invalid_numbers) ... ok
+test_text_voice_and_speed_each_change_cache_key (new_audio_tests.SpeechCacheTests.test_text_voice_and_speed_each_change_cache_key) ... ok
+test_all_twelve_user_names_and_prefix (policy_tests.SpeechPolicyTests.test_all_twelve_user_names_and_prefix) ... ok
+test_async_submit_returns_before_first_playback_finishes (policy_tests.SpeechPolicyTests.test_async_submit_returns_before_first_playback_finishes) ... ok
+test_background_failure_and_exception_become_false_then_next_task_runs (policy_tests.SpeechPolicyTests.test_background_failure_and_exception_become_false_then_next_task_runs) ... ok
+test_background_queue_is_fifo_and_playback_does_not_overlap (policy_tests.SpeechPolicyTests.test_background_queue_is_fifo_and_playback_does_not_overlap) ... ok
+test_busy_playback_does_not_block_next_grasp_submit (policy_tests.SpeechPolicyTests.test_busy_playback_does_not_block_next_grasp_submit) ... ok
+test_close_false_returns_while_audio_is_still_running (policy_tests.SpeechPolicyTests.test_close_false_returns_while_audio_is_still_running) ... ok
+test_close_true_drains_tail_and_repeated_close_is_safe (policy_tests.SpeechPolicyTests.test_close_true_drains_tail_and_repeated_close_is_safe) ... ok
+test_closed_service_rejects_new_scan_and_grasp_without_starting_worker (policy_tests.SpeechPolicyTests.test_closed_service_rejects_new_scan_and_grasp_without_starting_worker) ... ok
+test_grasp_is_announced_each_time_even_after_scan (policy_tests.SpeechPolicyTests.test_grasp_is_announced_each_time_even_after_scan) ... ok
+test_import_and_constructor_have_no_player_or_worker_side_effects (policy_tests.SpeechPolicyTests.test_import_and_constructor_have_no_player_or_worker_side_effects) ... ok
+test_invalid_retry_configuration_is_rejected (policy_tests.SpeechPolicyTests.test_invalid_retry_configuration_is_rejected) ... ok
+test_labels_and_stations_normalize_without_guessing (policy_tests.SpeechPolicyTests.test_labels_and_stations_normalize_without_guessing) ... ok
+test_only_real_boolean_true_confirms_playback (policy_tests.SpeechPolicyTests.test_only_real_boolean_true_confirms_playback) ... ok
+test_revisit_resets_visit_dedup_but_keeps_success_history (policy_tests.SpeechPolicyTests.test_revisit_resets_visit_dedup_but_keeps_success_history) ... ok
+test_same_category_at_different_stations_is_announced_twice (policy_tests.SpeechPolicyTests.test_same_category_at_different_stations_is_announced_twice) ... ok
+test_same_station_multiple_frames_deduplicate_success (policy_tests.SpeechPolicyTests.test_same_station_multiple_frames_deduplicate_success) ... ok
+test_scan_failure_does_not_register_and_next_frame_can_retry (policy_tests.SpeechPolicyTests.test_scan_failure_does_not_register_and_next_frame_can_retry) ... ok
+test_scan_station_is_required_and_invalid_stations_do_not_play (policy_tests.SpeechPolicyTests.test_scan_station_is_required_and_invalid_stations_do_not_play) ... ok
+test_success_reports_are_defensive_copies (policy_tests.SpeechPolicyTests.test_success_reports_are_defensive_copies) ... ok
+test_sync_scan_playback_does_not_block_async_submit (policy_tests.SpeechPolicyTests.test_sync_scan_playback_does_not_block_async_submit) ... ok
+test_unknown_target_neither_plays_nor_starts_worker (policy_tests.SpeechPolicyTests.test_unknown_target_neither_plays_nor_starts_worker) ... ok
+test_background_failure_does_not_change_grasp_result (workflow_tests.GraspWorkflowTests.test_background_failure_does_not_change_grasp_result) ... ok
+test_grasp_executes_after_ten_samples_while_audio_is_unfinished (workflow_tests.GraspWorkflowTests.test_grasp_executes_after_ten_samples_while_audio_is_unfinished) ... ok
+test_guard_after_submission_can_still_prevent_grasp (workflow_tests.GraspWorkflowTests.test_guard_after_submission_can_still_prevent_grasp) ... ok
+test_ik_rejection_propagates_without_waiting_for_audio (workflow_tests.GraspWorkflowTests.test_ik_rejection_propagates_without_waiting_for_audio) ... ok
+test_imports_and_construction_do_not_start_audio_or_threads (workflow_tests.ImportIsolationTests.test_imports_and_construction_do_not_start_audio_or_threads) ... ok
+test_package_keeps_legacy_exports_lazy (workflow_tests.ImportIsolationTests.test_package_keeps_legacy_exports_lazy) ... ok
+test_actual_mission_announces_same_label_at_two_stations_and_records_both (workflow_tests.MissionScanReportTests.test_actual_mission_announces_same_label_at_two_stations_and_records_both) ... [播报/抓取前] 服务已关闭，本次未提交。
+ok
+test_every_station_is_recognized_even_when_scan_record_is_empty (competition_tests.RetryQueueTests.test_every_station_is_recognized_even_when_scan_record_is_empty) ... === Competition Mission Start ===
+[策略] 固定点扫描: ['LM2', 'LM3', 'LM4', 'LM5', 'LM6']
+[策略] 抓取优先级: ['LM6', 'LM5', 'LM4', 'LM3', 'LM2']
+[播报/扫描/点位 LM5] 未配置中文名称：'Obj5'；本次不播报，请检查名称映射。
+[扫描] LM6 的播报观察点为 LM15
+[识别汇总] 共记录 1 个类别，所有发现点位: {'Obj5': ['LM5']}
+[抓取轮次] 第 1 轮逐点现场识别: ['LM6', 'LM5', 'LM4', 'LM3', 'LM2']
+[抓取现场识别] LM6: 到站，进入识别位姿并搜索目标；扫描阶段无记录，本次仍执行现场识别
+[抓取现场识别] LM6: LM6 no stable target；本轮该点未发现可抓目标，继续下一个抓取点。
+[抓取现场识别] LM5: 到站，进入识别位姿并搜索目标；扫描阶段提示类别=['Obj5']
+[抓取回位] LM5: 夹紧完成，直接返回初始/运输位姿。
+[得分区] 已完成第 1 件: Obj5@LM5；LM5 标记为已完成，后续循环不再识别/抓取该点。
+[抓取现场识别] LM4: 到站，进入识别位姿并搜索目标；扫描阶段无记录，本次仍执行现场识别
+[抓取现场识别] LM4: LM4 no stable target；本轮该点未发现可抓目标，继续下一个抓取点。
+[抓取现场识别] LM3: 到站，进入识别位姿并搜索目标；扫描阶段无记录，本次仍执行现场识别
+[抓取现场识别] LM3: LM3 no stable target；本轮该点未发现可抓目标，继续下一个抓取点。
+[抓取现场识别] LM2: 到站，进入识别位姿并搜索目标；扫描阶段无记录，本次仍执行现场识别
+[抓取现场识别] LM2: LM2 no stable target；本轮该点未发现可抓目标，继续下一个抓取点。
+[抓取循环] 第 1 轮结束：本轮识别到过物品。继续下一轮，仅检查尚未成功抓取的点；已完成点=['LM5']。
+[抓取循环] 第 2 轮仅检查未完成点: ['LM2', 'LM3', 'LM4', 'LM6']；已完成点=['LM5']
+[抓取现场识别] LM2: 到站，进入识别位姿并搜索目标；扫描阶段无记录，本次仍执行现场识别
+[抓取现场识别] LM2: LM2 no stable target；本轮该点未发现可抓目标，继续下一个抓取点。
+[抓取现场识别] LM3: 到站，进入识别位姿并搜索目标；扫描阶段无记录，本次仍执行现场识别
+[抓取现场识别] LM3: LM3 no stable target；本轮该点未发现可抓目标，继续下一个抓取点。
+[抓取现场识别] LM4: 到站，进入识别位姿并搜索目标；扫描阶段无记录，本次仍执行现场识别
+[抓取现场识别] LM4: LM4 no stable target；本轮该点未发现可抓目标，继续下一个抓取点。
+[抓取现场识别] LM6: 到站，进入识别位姿并搜索目标；扫描阶段无记录，本次仍执行现场识别
+[抓取现场识别] LM6: LM6 no stable target；本轮该点未发现可抓目标，继续下一个抓取点。
+[任务完成] LM2~LM6 已完整巡检一轮，所有抓取点均未再识别到可抓目标，判定物品已全部抓取完。
+=== Mission Finished: exited via LM8 ===
+ok
+test_full_empty_round_finishes_without_waiting_for_time_limit (competition_tests.RetryQueueTests.test_full_empty_round_finishes_without_waiting_for_time_limit) ... === Competition Mission Start ===
+[策略] 固定点扫描: ['LM2', 'LM3', 'LM4', 'LM5', 'LM6']
+[策略] 抓取优先级: ['LM6', 'LM5', 'LM4', 'LM3', 'LM2']
+[扫描] LM6 的播报观察点为 LM15
+[识别汇总] 共记录 0 个类别，所有发现点位: {}
+[抓取轮次] 第 1 轮逐点现场识别: ['LM6', 'LM5', 'LM4', 'LM3', 'LM2']
+[抓取现场识别] LM6: 到站，进入识别位姿并搜索目标；扫描阶段无记录，本次仍执行现场识别
+[抓取现场识别] LM6: LM6 no stable target；本轮该点未发现可抓目标，继续下一个抓取点。
+[抓取现场识别] LM5: 到站，进入识别位姿并搜索目标；扫描阶段无记录，本次仍执行现场识别
+[抓取现场识别] LM5: LM5 no stable target；本轮该点未发现可抓目标，继续下一个抓取点。
+[抓取现场识别] LM4: 到站，进入识别位姿并搜索目标；扫描阶段无记录，本次仍执行现场识别
+[抓取现场识别] LM4: LM4 no stable target；本轮该点未发现可抓目标，继续下一个抓取点。
+[抓取现场识别] LM3: 到站，进入识别位姿并搜索目标；扫描阶段无记录，本次仍执行现场识别
+[抓取现场识别] LM3: LM3 no stable target；本轮该点未发现可抓目标，继续下一个抓取点。
+[抓取现场识别] LM2: 到站，进入识别位姿并搜索目标；扫描阶段无记录，本次仍执行现场识别
+[抓取现场识别] LM2: LM2 no stable target；本轮该点未发现可抓目标，继续下一个抓取点。
+[任务完成] LM2~LM6 已完整巡检一轮，所有抓取点均未再识别到可抓目标，判定物品已全部抓取完。
+=== Mission Finished: exited via LM8 ===
+ok
+test_grasp_sdk_runtime_error_aborts_before_next_station (competition_tests.RetryQueueTests.test_grasp_sdk_runtime_error_aborts_before_next_station) ... === Competition Mission Start ===
+[策略] 固定点扫描: ['LM2', 'LM3', 'LM4', 'LM5', 'LM6']
+[策略] 抓取优先级: ['LM6', 'LM5', 'LM4', 'LM3', 'LM2']
+[扫描] LM6 的播报观察点为 LM15
+[识别汇总] 共记录 0 个类别，所有发现点位: {}
+[抓取轮次] 第 1 轮逐点现场识别: ['LM6', 'LM5', 'LM4', 'LM3', 'LM2']
+[抓取现场识别] LM6: 到站，进入识别位姿并搜索目标；扫描阶段无记录，本次仍执行现场识别
+ok
+test_object_missed_during_scan_can_be_found_and_grasped (competition_tests.RetryQueueTests.test_object_missed_during_scan_can_be_found_and_grasped) ... === Competition Mission Start ===
+[策略] 固定点扫描: ['LM2', 'LM3', 'LM4', 'LM5', 'LM6']
+[策略] 抓取优先级: ['LM6', 'LM5', 'LM4', 'LM3', 'LM2']
+[扫描] LM6 的播报观察点为 LM15
+[识别汇总] 共记录 0 个类别，所有发现点位: {}
+[抓取轮次] 第 1 轮逐点现场识别: ['LM6', 'LM5', 'LM4', 'LM3', 'LM2']
+[抓取现场识别] LM6: 到站，进入识别位姿并搜索目标；扫描阶段无记录，本次仍执行现场识别
+[抓取现场识别] LM6: LM6 no stable target；本轮该点未发现可抓目标，继续下一个抓取点。
+[抓取现场识别] LM5: 到站，进入识别位姿并搜索目标；扫描阶段无记录，本次仍执行现场识别
+[抓取现场识别] LM5: LM5 no stable target；本轮该点未发现可抓目标，继续下一个抓取点。
+[抓取现场识别] LM4: 到站，进入识别位姿并搜索目标；扫描阶段无记录，本次仍执行现场识别
+[抓取现场识别] LM4: LM4 no stable target；本轮该点未发现可抓目标，继续下一个抓取点。
+[抓取现场识别] LM3: 到站，进入识别位姿并搜索目标；扫描阶段无记录，本次仍执行现场识别
+[抓取回位] LM3: 夹紧完成，直接返回初始/运输位姿。
+[得分区] 已完成第 1 件: LateObj@LM3；LM3 标记为已完成，后续循环不再识别/抓取该点。
+[抓取现场识别] LM2: 到站，进入识别位姿并搜索目标；扫描阶段无记录，本次仍执行现场识别
+[抓取现场识别] LM2: LM2 no stable target；本轮该点未发现可抓目标，继续下一个抓取点。
+[抓取循环] 第 1 轮结束：本轮识别到过物品。继续下一轮，仅检查尚未成功抓取的点；已完成点=['LM3']。
+[抓取循环] 第 2 轮仅检查未完成点: ['LM2', 'LM4', 'LM5', 'LM6']；已完成点=['LM3']
+[抓取现场识别] LM2: 到站，进入识别位姿并搜索目标；扫描阶段无记录，本次仍执行现场识别
+[抓取现场识别] LM2: LM2 no stable target；本轮该点未发现可抓目标，继续下一个抓取点。
+[抓取现场识别] LM4: 到站，进入识别位姿并搜索目标；扫描阶段无记录，本次仍执行现场识别
+[抓取现场识别] LM4: LM4 no stable target；本轮该点未发现可抓目标，继续下一个抓取点。
+[抓取现场识别] LM5: 到站，进入识别位姿并搜索目标；扫描阶段无记录，本次仍执行现场识别
+[抓取现场识别] LM5: LM5 no stable target；本轮该点未发现可抓目标，继续下一个抓取点。
+[抓取现场识别] LM6: 到站，进入识别位姿并搜索目标；扫描阶段无记录，本次仍执行现场识别
+[抓取现场识别] LM6: LM6 no stable target；本轮该点未发现可抓目标，继续下一个抓取点。
+[任务完成] LM2~LM6 已完整巡检一轮，所有抓取点均未再识别到可抓目标，判定物品已全部抓取完。
+=== Mission Finished: exited via LM8 ===
+ok
+test_retreat_failure_prevents_navigation (competition_tests.RetryQueueTests.test_retreat_failure_prevents_navigation) ... === Competition Mission Start ===
+[策略] 固定点扫描: ['LM2', 'LM3', 'LM4', 'LM5', 'LM6']
+[策略] 抓取优先级: ['LM6', 'LM5', 'LM4', 'LM3', 'LM2']
+[扫描] LM6 的播报观察点为 LM15
+[识别汇总] 共记录 0 个类别，所有发现点位: {}
+[抓取轮次] 第 1 轮逐点现场识别: ['LM6', 'LM5', 'LM4', 'LM3', 'LM2']
+[抓取现场识别] LM6: 到站，进入识别位姿并搜索目标；扫描阶段无记录，本次仍执行现场识别
+[抓取现场识别] LM6: LM6 no stable target；本轮该点未发现可抓目标，继续下一个抓取点。
+ok
+test_scan_uses_far_station_and_grasp_uses_task_station (competition_tests.RetryQueueTests.test_scan_uses_far_station_and_grasp_uses_task_station) ... === Competition Mission Start ===
+[策略] 固定点扫描: ['LM2', 'LM3', 'LM4', 'LM5', 'LM6']
+[策略] 抓取优先级: ['LM6', 'LM5', 'LM4', 'LM3', 'LM2']
+[扫描] LM5 的播报观察点为 LM15
+[扫描] LM6 的播报观察点为 LM15
+[识别汇总] 共记录 0 个类别，所有发现点位: {}
+[抓取轮次] 第 1 轮逐点现场识别: ['LM6', 'LM5', 'LM4', 'LM3', 'LM2']
+[抓取现场识别] LM6: 到站，进入识别位姿并搜索目标；扫描阶段无记录，本次仍执行现场识别
+[抓取现场识别] LM6: LM6 no stable target；本轮该点未发现可抓目标，继续下一个抓取点。
+[抓取现场识别] LM5: 到站，进入识别位姿并搜索目标；扫描阶段无记录，本次仍执行现场识别
+[抓取现场识别] LM5: LM5 no stable target；本轮该点未发现可抓目标，继续下一个抓取点。
+[抓取现场识别] LM4: 到站，进入识别位姿并搜索目标；扫描阶段无记录，本次仍执行现场识别
+[抓取现场识别] LM4: LM4 no stable target；本轮该点未发现可抓目标，继续下一个抓取点。
+[抓取现场识别] LM3: 到站，进入识别位姿并搜索目标；扫描阶段无记录，本次仍执行现场识别
+[抓取现场识别] LM3: LM3 no stable target；本轮该点未发现可抓目标，继续下一个抓取点。
+[抓取现场识别] LM2: 到站，进入识别位姿并搜索目标；扫描阶段无记录，本次仍执行现场识别
+[抓取现场识别] LM2: LM2 no stable target；本轮该点未发现可抓目标，继续下一个抓取点。
+[任务完成] LM2~LM6 已完整巡检一轮，所有抓取点均未再识别到可抓目标，判定物品已全部抓取完。
+=== Mission Finished: exited via LM8 ===
+ok
+test_success_goes_to_lm7_then_continues_next_station (competition_tests.RetryQueueTests.test_success_goes_to_lm7_then_continues_next_station) ... === Competition Mission Start ===
+[策略] 固定点扫描: ['LM2', 'LM3', 'LM4', 'LM5', 'LM6']
+[策略] 抓取优先级: ['LM6', 'LM5', 'LM4', 'LM3', 'LM2']
+[扫描] LM6 的播报观察点为 LM15
+[识别汇总] 共记录 0 个类别，所有发现点位: {}
+[抓取轮次] 第 1 轮逐点现场识别: ['LM6', 'LM5', 'LM4', 'LM3', 'LM2']
+[抓取现场识别] LM6: 到站，进入识别位姿并搜索目标；扫描阶段无记录，本次仍执行现场识别
+[抓取回位] LM6: 夹紧完成，直接返回初始/运输位姿。
+[得分区] 已完成第 1 件: Obj6@LM6；LM6 标记为已完成，后续循环不再识别/抓取该点。
+[抓取现场识别] LM5: 到站，进入识别位姿并搜索目标；扫描阶段无记录，本次仍执行现场识别
+[抓取现场识别] LM5: LM5 no stable target；本轮该点未发现可抓目标，继续下一个抓取点。
+[抓取现场识别] LM4: 到站，进入识别位姿并搜索目标；扫描阶段无记录，本次仍执行现场识别
+[抓取现场识别] LM4: LM4 no stable target；本轮该点未发现可抓目标，继续下一个抓取点。
+[抓取现场识别] LM3: 到站，进入识别位姿并搜索目标；扫描阶段无记录，本次仍执行现场识别
+[抓取现场识别] LM3: LM3 no stable target；本轮该点未发现可抓目标，继续下一个抓取点。
+[抓取现场识别] LM2: 到站，进入识别位姿并搜索目标；扫描阶段无记录，本次仍执行现场识别
+[抓取现场识别] LM2: LM2 no stable target；本轮该点未发现可抓目标，继续下一个抓取点。
+[抓取循环] 第 1 轮结束：本轮识别到过物品。继续下一轮，仅检查尚未成功抓取的点；已完成点=['LM6']。
+[抓取循环] 第 2 轮仅检查未完成点: ['LM2', 'LM3', 'LM4', 'LM5']；已完成点=['LM6']
+[抓取现场识别] LM2: 到站，进入识别位姿并搜索目标；扫描阶段无记录，本次仍执行现场识别
+[抓取现场识别] LM2: LM2 no stable target；本轮该点未发现可抓目标，继续下一个抓取点。
+[抓取现场识别] LM3: 到站，进入识别位姿并搜索目标；扫描阶段无记录，本次仍执行现场识别
+[抓取现场识别] LM3: LM3 no stable target；本轮该点未发现可抓目标，继续下一个抓取点。
+[抓取现场识别] LM4: 到站，进入识别位姿并搜索目标；扫描阶段无记录，本次仍执行现场识别
+[抓取现场识别] LM4: LM4 no stable target；本轮该点未发现可抓目标，继续下一个抓取点。
+[抓取现场识别] LM5: 到站，进入识别位姿并搜索目标；扫描阶段无记录，本次仍执行现场识别
+[抓取现场识别] LM5: LM5 no stable target；本轮该点未发现可抓目标，继续下一个抓取点。
+[任务完成] LM2~LM6 已完整巡检一轮，所有抓取点均未再识别到可抓目标，判定物品已全部抓取完。
+=== Mission Finished: exited via LM8 ===
+ok
+test_time_limit_stops_new_recognition_and_exits (competition_tests.RetryQueueTests.test_time_limit_stops_new_recognition_and_exits) ... === Competition Mission Start ===
+[策略] 固定点扫描: ['LM2', 'LM3', 'LM4', 'LM5', 'LM6']
+[策略] 抓取优先级: ['LM6', 'LM5', 'LM4', 'LM3', 'LM2']
+[扫描] LM6 的播报观察点为 LM15
+[识别汇总] 共记录 0 个类别，所有发现点位: {}
+[抓取轮次] 第 1 轮逐点现场识别: ['LM6', 'LM5', 'LM4', 'LM3', 'LM2']
+[抓取现场识别] LM6: 到站，进入识别位姿并搜索目标；扫描阶段无记录，本次仍执行现场识别
+[抓取现场识别] LM6: LM6 no stable target；本轮该点未发现可抓目标，继续下一个抓取点。
+[时间] 已达到 8 分钟任务上限，停止新增抓取。
+[任务结束] 8 分钟到时，停止继续识别抓取。最后一轮未确认点位: []
+=== Mission Finished: exited via LM8 ===
+ok
+test_empty_expected_labels_allows_live_recognition (competition_tests.ScannerTargetTests.test_empty_expected_labels_allows_live_recognition) ... ok
+test_scanner_ignores_unrecorded_higher_confidence_target (competition_tests.ScannerTargetTests.test_scanner_ignores_unrecorded_higher_confidence_target) ... [抓取单次识别] LM5: 进入识别点 1。
+[抓取锁定] LM5: Cola (confidence=0.550)；开始收集 1 个稳定点，采样窗口 1.0s。
+[抓取采样] Cola@LM5: 1/1, xyz=[0.1, 0.2, 0.3] m, YOLO平均=0.00s/帧
+[抓取采样完成] Cola@LM5: 1/1, 中值=[0.1, 0.2, 0.3] m, 处理帧=1, YOLO平均=0.00s/帧
+[播报/抓取前/点位 LM5] 识别到可乐（第 1/2 次）
+[播报/抓取前/点位 LM5] 后台播放结果：成功
+ok
+test_current_settings_keep_latest_route_and_six_second_scan (multicamera_latest.TeammateMergeTests.test_current_settings_keep_latest_route_and_six_second_scan) ... ok
+test_transport_before_navigation_and_real_labels_announced_per_station (multicamera_latest.TeammateMergeTests.test_transport_before_navigation_and_real_labels_announced_per_station) ... === Competition Mission Start ===
+[策略] 固定点扫描: ['LM2', 'LM3', 'LM4', 'LM5', 'LM6']
+[策略] 抓取优先级: ['LM6', 'LM5', 'LM4', 'LM3', 'LM2']
+[播报/扫描/点位 LM2] 识别到可乐（第 1/2 次）
+[播报/扫描/点位 LM3] 识别到可乐（第 1/2 次）
+[播报/扫描/点位 LM4] 识别到可乐（第 1/2 次）
+[播报/扫描/点位 LM5] 识别到可乐（第 1/2 次）
+[播报/扫描/点位 LM6] 识别到可乐（第 1/2 次）
+[识别汇总] 共记录 1 个类别，所有发现点位: {'cola': ['LM2', 'LM3', 'LM4', 'LM5', 'LM6']}
+[抓取轮次] 第 1 轮逐点现场识别: ['LM6', 'LM5', 'LM4', 'LM3', 'LM2']
+[抓取现场识别] LM6: 到站，进入识别位姿并搜索目标；扫描阶段提示类别=['cola']
+[抓取现场识别] LM6: 本点没有可抓取物品；本轮该点未发现可抓目标，继续下一个抓取点。
+[抓取现场识别] LM5: 到站，进入识别位姿并搜索目标；扫描阶段提示类别=['cola']
+[抓取现场识别] LM5: 本点没有可抓取物品；本轮该点未发现可抓目标，继续下一个抓取点。
+[抓取现场识别] LM4: 到站，进入识别位姿并搜索目标；扫描阶段提示类别=['cola']
+[抓取现场识别] LM4: 本点没有可抓取物品；本轮该点未发现可抓目标，继续下一个抓取点。
+[抓取现场识别] LM3: 到站，进入识别位姿并搜索目标；扫描阶段提示类别=['cola']
+[抓取现场识别] LM3: 本点没有可抓取物品；本轮该点未发现可抓目标，继续下一个抓取点。
+[抓取现场识别] LM2: 到站，进入识别位姿并搜索目标；扫描阶段提示类别=['cola']
+[抓取现场识别] LM2: 本点没有可抓取物品；本轮该点未发现可抓目标，继续下一个抓取点。
+[任务完成] LM2~LM6 已完整巡检一轮，所有抓取点均未再识别到可抓目标，判定物品已全部抓取完。
+=== Mission Finished: exited via LM8 ===
+ok
+test_cancel_guard_aborts_device_selection (multicamera_tests.CameraTests.test_cancel_guard_aborts_device_selection) ... ok
+test_old_device_closed_before_new_device_started (multicamera_tests.CameraTests.test_old_device_closed_before_new_device_started) ... [相机切换] 当前为 chest，序列号 chest-123
+[相机切换] 当前为 head，序列号 head-456
+ok
+test_repeated_frame_timestamp_not_counted_twice (multicamera_tests.CameraTests.test_repeated_frame_timestamp_not_counted_twice) ... [相机切换] 当前为 chest，序列号 chest-123
+ok
+test_same_camera_reused_across_two_points (multicamera_tests.CameraTests.test_same_camera_reused_across_two_points) ... [相机切换] 当前为 chest，序列号 chest-123
+ok
+test_start_failure_releases_device (multicamera_tests.CameraTests.test_start_failure_releases_device) ... ok
+test_stop_failure_prevents_starting_next_device (multicamera_tests.CameraTests.test_stop_failure_prevents_starting_next_device) ... [相机切换] 当前为 chest，序列号 chest-123
+ok
+test_warmup_timeout_releases_device (multicamera_tests.CameraTests.test_warmup_timeout_releases_device) ... ok
+test_exit_point_cannot_accidentally_be_recognition_point (multicamera_tests.PhaseTests.test_exit_point_cannot_accidentally_be_recognition_point) ... ok
+test_far_navigation_point_keeps_logical_station_camera_assignment (multicamera_tests.PhaseTests.test_far_navigation_point_keeps_logical_station_camera_assignment) ... [提示] SCAN_ROUTE 最后一点是 LM9，识别结束后将额外导航到 HOME=LM6
+ok
+test_grasp_only_station_can_still_be_retried (multicamera_tests.PhaseTests.test_grasp_only_station_can_still_be_retried) ... [提示] SCAN_ROUTE 最后一点是 LM9，识别结束后将额外导航到 HOME=LM6
+[提示] 抓取优先级包含未在扫描路线出现的点: ['LM3']
+ok
+test_preview_never_constructs_hardware (multicamera_tests.PhaseTests.test_preview_never_constructs_hardware) ... [提示] SCAN_ROUTE 最后一点是 LM9，识别结束后将额外导航到 HOME=LM6
+ok
+test_recognition_only_point_excluded_from_all_grasp_rounds (multicamera_tests.PhaseTests.test_recognition_only_point_excluded_from_all_grasp_rounds) ... [提示] SCAN_ROUTE 最后一点是 LM9，识别结束后将额外导航到 HOME=LM2
+=== Competition Mission Start ===
+[策略] 固定点扫描: ['LM2', 'LM9']
+[策略] 抓取优先级: ['LM2']
+[识别] LM2 / chest: cola
+[播报/扫描/点位 LM2] 识别到可乐（第 1/2 次）
+[识别] LM9 / head: cola
+[播报/扫描/点位 LM9] 识别到可乐（第 1/2 次）
+[识别汇总] 共记录 1 个类别，所有发现点位: {'cola': ['LM2', 'LM9']}
+[抓取轮次] 第 1 轮逐点现场识别: ['LM2']
+[抓取现场识别] LM2: 到站，进入识别位姿并搜索目标；扫描阶段提示类别=['cola']
+[抓取未完成] LM2: 目标未通过工作空间检查: outside_workspace_x；已识别到物品但当前不可抓，保留到下一轮继续识别。
+[抓取循环] 第 1 轮结束：本轮识别到过物品，未确认点=['LM2']。继续下一轮，仅检查尚未成功抓取的点；已完成点=[]。
+[抓取循环] 第 2 轮仅检查未完成点: ['LM2']；已完成点=[]
+[抓取现场识别] LM2: 到站，进入识别位姿并搜索目标；扫描阶段提示类别=['cola']
+[抓取回位] LM2: 夹紧完成，直接返回初始/运输位姿。
+[得分区] 已完成第 1 件: cola@LM2；LM2 标记为已完成，后续循环不再识别/抓取该点。
+[抓取循环] 第 2 轮结束：本轮识别到过物品。继续下一轮，仅检查尚未成功抓取的点；已完成点=['LM2']。
+[抓取循环] 第 3 轮仅检查未完成点: []；已完成点=['LM2']
+[任务完成] 所有抓取点都已成功抓取并送至 LM7，后续不再重复识别这些点。
+=== Mission Finished: exited via LM8 ===
+ok
+test_count_same_class_only_once_per_frame (multicamera_tests.RecognitionTests.test_count_same_class_only_once_per_frame) ... ok
+test_detection_disappearance_resets_confirmation (multicamera_tests.RecognitionTests.test_detection_disappearance_resets_confirmation) ... ok
+test_grasp_camera_starts_only_after_recognition_device_stopped (multicamera_tests.RecognitionTests.test_grasp_camera_starts_only_after_recognition_device_stopped) ... ok
+test_live_cancel_releases_camera_in_callers_finally (multicamera_tests.RecognitionTests.test_live_cancel_releases_camera_in_callers_finally) ... ok
+test_live_window_receives_station_and_camera (multicamera_tests.RecognitionTests.test_live_window_receives_station_and_camera) ... [识别] LM9 / head: cola
+ok
+test_no_frames_is_hardware_error_not_empty_scene (multicamera_tests.RecognitionTests.test_no_frames_is_hardware_error_not_empty_scene) ... ok
+test_no_gui_calls_when_display_disabled (multicamera_tests.RecognitionTests.test_no_gui_calls_when_display_disabled) ... [识别] LM2 / chest: cola
+ok
+test_rgb_recognition_works_with_no_valid_depth (multicamera_tests.RecognitionTests.test_rgb_recognition_works_with_no_valid_depth) ... [识别] LM9 / head: cola
+ok
+test_scan_never_calls_grasp_pipeline_or_arm (multicamera_tests.RecognitionTests.test_scan_never_calls_grasp_pipeline_or_arm) ... [识别] LM9 / head: cola
+ok
+test_station_change_does_not_reuse_stability (multicamera_tests.RecognitionTests.test_station_change_does_not_reuse_stability) ... [识别] LM2 / chest: cola
+[识别] LM9 / head: 未发现稳定类别
+ok
+test_arm_camera_cannot_be_used_as_chest (multicamera_tests.SettingsTests.test_arm_camera_cannot_be_used_as_chest) ... ok
+test_bad_camera_config_rejected_before_loading_grasp_or_model (multicamera_tests.SettingsTests.test_bad_camera_config_rejected_before_loading_grasp_or_model) ... ok
+test_cli_can_override_default_live_display (multicamera_tests.SettingsTests.test_cli_can_override_default_live_display) ... ok
+test_duplicate_in_single_container_rejected (multicamera_tests.SettingsTests.test_duplicate_in_single_container_rejected) ... ok
+test_gui_is_checked_before_motion_on_linux (multicamera_tests.SettingsTests.test_gui_is_checked_before_motion_on_linux) ... ok
+test_invalid_boolean_and_nonfinite_parameters_rejected (multicamera_tests.SettingsTests.test_invalid_boolean_and_nonfinite_parameters_rejected) ... ok
+test_missing_head_serial_checked_before_arrival (multicamera_tests.SettingsTests.test_missing_head_serial_checked_before_arrival) ... ok
+test_same_serial_for_two_roles_rejected (multicamera_tests.SettingsTests.test_same_serial_for_two_roles_rejected) ... ok
+test_station_in_two_containers_rejected (multicamera_tests.SettingsTests.test_station_in_two_containers_rejected) ... ok
+test_two_containers_choose_expected_camera (multicamera_tests.SettingsTests.test_two_containers_choose_expected_camera) ... ok
+test_unknown_station_does_not_fall_back_to_random_camera (multicamera_tests.SettingsTests.test_unknown_station_does_not_fall_back_to_random_camera) ... ok
+test_q_key_raises_cancel_instead_of_entering_grasp (multicamera_tests.WindowTests.test_q_key_raises_cancel_instead_of_entering_grasp) ... ok
+test_s_key_saves_image_and_matching_camera_metadata (multicamera_tests.WindowTests.test_s_key_saves_image_and_matching_camera_metadata) ... [截图] C:\Users\Matthew\AppData\Local\Temp\tmprq0igcxj\20261003_184101_118053_head.jpg
+ok
+
+----------------------------------------------------------------------
+Ran 126 tests in 1.618s
+
+OK
+Preview mode. Competition plan:
+START: LM1
+SCAN : LM2 -> LM3 -> LM4 -> LM5 -> LM6
+  LM2: chest / 151222073707
+  LM3: chest / 151222073707
+  LM4: chest / 151222073707
+  LM5: chest / 151222073707
+  LM6: chest / 151222073707
+HOME : LM6 (出口内侧，不真正离场)
+GRASP: LM6 -> LM5 -> LM4 -> LM3 -> LM2
+SCORE: LM7
+EXIT : LM8 (目标完成、无目标或比赛超时后离场)

@@ -333,8 +333,6 @@ class FakeFastAPI:
             return function
         return register
 
-    get = post
-
 
 def load_actual_chat():
     fastapi = ModuleType("fastapi")
@@ -378,15 +376,6 @@ class ChatServiceTests(unittest.TestCase):
 
     async def request(self, text="识别到雪碧", voice="zh-CN-XiaoxiaoNeural", speed=1.2):
         return await self.chat.speech(model="tts-1", input=text, voice=voice, speed=speed)
-
-    def test_health_identifies_service_without_synthesis_or_cache(self):
-        self.assertIn("/health", self.chat.app.routes)
-        info = asyncio.run(self.chat.health())
-        self.assertEqual(info["service"], "robocup-object-tts")
-        self.assertEqual(info["protocol"], 1)
-        self.assertEqual(info["pid"], self.chat.os.getpid())
-        self.assertFalse(self.chat.AUDIO_DIR.exists())
-        self.assertEqual(self.calls, [])
 
     def test_chinese_protocol_and_cache_reuse(self):
         self.assertIn("/v1/audio/speech", self.chat.app.routes)
