@@ -119,7 +119,7 @@ height_profiles:
       - joints_deg: [57.586, 112.896, 33.269, -121.425, -104.002, 116.63]
         # 替换 [] 为实测关节角列表，例如下一行格式（不要照搬示意值）：
         # approach_waypoints_joints_deg: [[J1, J2, J3, J4, J5, J6], [J1, J2, J3, J4, J5, J6]]
-        approach_waypoints_joints_deg: [112.73, 60.71, 128.993, 23.455, -108.179, 85.558]
+        approach_waypoints_joints_deg: []
       # 增加地面第2识别点：取消下一行注释并填实测关节角
       # - joints_deg: [J1, J2, J3, J4, J5, J6]
       #   approach_waypoints_joints_deg: []  # 第2识别点单独填写
