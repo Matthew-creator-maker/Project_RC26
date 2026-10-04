@@ -125,7 +125,7 @@ height_profiles:
       #   approach_waypoints_joints_deg: []  # 第2识别点单独填写
     grasp_orientation_rad: [1.719, 0.384, 1.356]
     # 基座 XYZ 位置补偿（米），直接平移；实际上下方向按安装/实测确定。
-    target_offset_base_m: [0.08, 0.0, 0.0] #（高度，深度，左右）
+    target_offset_base_m: [0.0, 0.0, 0.0] #（高度，深度，左右）
     final_tool_offset_m: [0.0, 0.0, 0.05]
     transition_tool_offset_m: [0.0, 0.0, -0.10]
 
