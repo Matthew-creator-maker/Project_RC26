@@ -116,7 +116,7 @@ def build_grasp_poses(
     xyz_base_m: Sequence[float],
     config: Dict[str, Any],
 ) -> Dict[str, List[float]]:
-    """按照 test_0914.py 的姿态和工具轴偏移生成抓取路径。"""
+    """先加基座 XYZ 补偿，再按抓取姿态叠加工具偏移生成抓取路径。"""
     arm_cfg = config.get("arm", {})
     orientation = arm_cfg.get("grasp_orientation_rad")
     if orientation is None or len(orientation) != 3:
@@ -125,6 +125,11 @@ def build_grasp_poses(
     grasp_pose = realman_pose_to_matrix(
         [*xyz_base_m, *orientation],
         degrees=False,
+    )
+    # 基座补偿直接加在位置上，不随抓取朝向旋转；不修改原始识别点。
+    grasp_pose[:3, 3] += finite_vector(
+        arm_cfg.get("target_offset_base_m", [0.0, 0.0, 0.0]),
+        3, "arm.target_offset_base_m",
     )
     final_pose = offset_pose_in_tool(
         grasp_pose,
@@ -235,6 +240,8 @@ def validate_config(config, execute=False, recognize_only=False, action="carry")
     approach_waypoints(config)
     for key in ("grasp_orientation_rad", "final_tool_offset_m", "transition_tool_offset_m"):
         finite_vector(arm_cfg.get(key), 3, "arm." + key)
+    finite_vector(arm_cfg.get("target_offset_base_m", [0.0, 0.0, 0.0]),
+                  3, "arm.target_offset_base_m")
     camera_to_end_matrix(config)
     if execute and not recognize_only:
         workspace = test_cfg.get("workspace_m", {})
@@ -359,6 +366,8 @@ def execute_prelocalized_grasp(
                 "target": target_label,
                 "xyz_camera_m": xyz_camera.tolist(),
                 "xyz_base_m": xyz_base.tolist(),
+                "target_offset_base_m": list(config.get("arm", {}).get(
+                    "target_offset_base_m", [0.0, 0.0, 0.0])),
                 "final_xyz_m": list(poses["final"][:3]),
                 "transition_xyz_m": list(poses["transition"][:3]),
             },

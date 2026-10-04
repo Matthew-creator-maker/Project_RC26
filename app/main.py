@@ -349,13 +349,14 @@ class CompetitionScanner:
         return value
 
     def _vision_config_for_station(self, station: str, observation_index: int = 1) -> dict[str, Any]:
-        """把当前高度档的抓取姿态覆盖到通用视觉配置。"""
+        """把当前高度档的抓取姿态和位置补偿覆盖到通用视觉配置。"""
         profile_name, profile = self._height_profile_for_station(station)
         arm_cfg = self.vision_config.get("arm", {})
         station_cfg = dict(self.vision_config)
         station_arm = dict(arm_cfg)
         for key, length in (
             ("grasp_orientation_rad", 3),
+            ("target_offset_base_m", 3),
             ("final_tool_offset_m", 3),
             ("transition_tool_offset_m", 3),
         ):
@@ -363,6 +364,10 @@ class CompetitionScanner:
                 station_arm[key] = self.module.finite_vector(
                     profile[key], length, f"height_profiles.{profile_name}.{key}"
                 )
+        station_arm["target_offset_base_m"] = self.module.finite_vector(
+            station_arm.get("target_offset_base_m", [0.0, 0.0, 0.0]),
+            3, "arm.target_offset_base_m",
+        )
         # 每个识别点可以有不同的绕行关节路径；独立抓取脚本使用 arm 下的默认路径。
         points = profile.get("observation_points", [])
         if not isinstance(points, list) or not 1 <= observation_index <= len(points):

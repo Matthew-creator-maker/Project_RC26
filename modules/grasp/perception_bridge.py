@@ -37,6 +37,10 @@ class PerceptionBridge:
                 if (not isinstance(values, list) or len(values) != 3
                         or any(type(x) not in (int, float) or not math.isfinite(x) for x in values)):
                     raise ValueError(f"arm.{key} 必须是 3 个有限数值")
+            grasp.finite_vector(
+                self.config.get("arm", {}).get("target_offset_base_m", [0.0, 0.0, 0.0]),
+                3, "arm.target_offset_base_m",
+            )
         transport = navigation_config.get("arm_transport", {})
         self.transport_joints = self._joints(transport.get("joints_deg"), "arm_transport.joints_deg")
         if transport.get("configured") is not True:

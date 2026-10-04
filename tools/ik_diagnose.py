@@ -40,18 +40,21 @@ def prepare(config_path, station, xyz_base):
     if profile.get('enabled') is not True:
         raise ValueError(f"{name} 未启用，先确认实机标定")
     arm = dict(config['arm'])
-    for key in ('grasp_orientation_rad', 'final_tool_offset_m', 'transition_tool_offset_m'):
+    for key in ('grasp_orientation_rad', 'target_offset_base_m', 'final_tool_offset_m', 'transition_tool_offset_m'):
         if key in profile:
             arm[key] = profile[key]
     orientation = vector(arm['grasp_orientation_rad'], 3, '抓取姿态（弧度）')
     center = realman_pose_to_matrix([*vector(xyz_base, 3, '物品中心（米）'), *orientation])
+    arm['target_offset_base_m'] = vector(
+        arm.get('target_offset_base_m', [0.0, 0.0, 0.0]), 3, '基座 XYZ 补偿（米）')
+    center[:3, 3] += arm['target_offset_base_m']
     final = offset_pose_in_tool(center, vector(arm['final_tool_offset_m'], 3, '最终偏移（米）'))
     transition = offset_pose_in_tool(final, vector(arm['transition_tool_offset_m'], 3, '过渡偏移（米）'))
     poses = {'transition': matrix_to_realman_pose(transition), 'final': matrix_to_realman_pose(final)}
     return config, {'config_path': str(Path(config_path).resolve()),
                     'station': station, 'height_profile': name, 'xyz_base_m': list(xyz_base),
                     'effective_grasp_parameters': {key: arm[key] for key in
-                        ('grasp_orientation_rad', 'final_tool_offset_m', 'transition_tool_offset_m')},
+                        ('grasp_orientation_rad', 'target_offset_base_m', 'final_tool_offset_m', 'transition_tool_offset_m')},
                     'poses_m_rad': poses, 'hardware_connected': False,
                     'note': 'IK 成功不等于整段运动无碰撞；本工具不会执行抓取。'}
 
