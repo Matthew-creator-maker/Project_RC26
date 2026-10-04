@@ -119,7 +119,7 @@ height_profiles:
       - joints_deg: [57.586, 112.896, 33.269, -121.425, -104.002, 116.63]
         # 替换 [] 为实测关节角列表，例如下一行格式（不要照搬示意值）：
         # approach_waypoints_joints_deg: [[J1, J2, J3, J4, J5, J6], [J1, J2, J3, J4, J5, J6]]
-        approach_waypoints_joints_deg: []
+        approach_waypoints_joints_deg: [112.73, 60.71, 128.993, 23.455, -108.179, 85.558]
       # 增加地面第2识别点：取消下一行注释并填实测关节角
       # - joints_deg: [J1, J2, J3, J4, J5, J6]
       #   approach_waypoints_joints_deg: []  # 第2识别点单独填写
@@ -138,7 +138,7 @@ height_profiles:
     rail_position_inc: -6000000  # TODO 填 0.5m 高度对应导轨 inc
     observation_points:
       - joints_deg: [5.03, 96.214, 36.861, -130.156, -104.051, 116.601]  # TODO 实测
-        approach_waypoints_joints_deg: []  # 填此识别点绕行用的实测关节角（度）
+        approach_waypoints_joints_deg: [112.73, 60.71, 128.993, 23.455, -108.179, 85.558]  # 填此识别点绕行用的实测关节角（度）
     grasp_orientation_rad: [1.514, 0.384, -0.070]  # TODO 实测
     # 基座 XYZ 位置补偿（米），直接平移；实际上下方向按安装/实测确定。
     target_offset_base_m: [0.08, 0.0, 0.0] #（高度，深度，左右）
@@ -153,7 +153,7 @@ height_profiles:
     rail_position_inc: -5500000  # TODO 实测
     observation_points:
       - joints_deg: [5.03, 96.214, 36.861, -130.156, -104.051, 116.601]  # TODO 实测
-        approach_waypoints_joints_deg: []  # 填此识别点绕行用的实测关节角（度）
+        approach_waypoints_joints_deg: [112.73, 60.71, 128.993, 23.455, -108.179, 85.558]  # 填此识别点绕行用的实测关节角（度）
     grasp_orientation_rad: [1.514, 0.384, -0.070]
     # 基座 XYZ 位置补偿（米），直接平移；实际上下方向按安装/实测确定。
     target_offset_base_m: [0.08, 0.0, 0.0] #（高度，深度，左右）
@@ -168,7 +168,7 @@ height_profiles:
     rail_position_inc: -4500000  # TODO 实测
     observation_points:
       - joints_deg: [5.03, 96.214, 36.861, -130.156, -104.051, 116.601]  # TODO 实测
-        approach_waypoints_joints_deg: []  # 填此识别点绕行用的实测关节角（度）
+        approach_waypoints_joints_deg: [112.73, 60.71, 128.993, 23.455, -108.179, 85.558]  # 填此识别点绕行用的实测关节角（度）
       # - joints_deg: [J1, J2, J3, J4, J5, J6]  # 可继续增加识别点
       #   approach_waypoints_joints_deg: []
     grasp_orientation_rad: [1.514, 0.384, -0.070]
@@ -185,7 +185,7 @@ height_profiles:
     rail_position_inc: 0  # 当前原代码非地面档使用的导轨行驶/上方位置
     observation_points:
       - joints_deg: [5.03, 96.214, 36.861, -130.156, -104.051, 116.601]
-        approach_waypoints_joints_deg: [[112.73, 60.71, 128.993, 23.455, -108.179, 85.558]]  # 此识别点实测关节角（度）
+        approach_waypoints_joints_deg: [112.73, 60.71, 128.993, 23.455, -108.179, 85.558]  # 此识别点实测关节角（度）
       # - joints_deg: [J1, J2, J3, J4, J5, J6]  # 0.8m 第2识别点预留
     grasp_orientation_rad: [1.514, 0.384, -0.070]
     # 基座 XYZ 位置补偿（米），直接平移；实际上下方向按安装/实测确定。
