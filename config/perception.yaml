@@ -114,7 +114,7 @@ height_profiles:
     stations: [LM6]
     enabled: true
     nominal_height_m: 0.0
-    rail_position_inc: -7000000
+    rail_position_inc: -6300000
     observation_points:
       - joints_deg: [57.586, 112.896, 33.269, -121.425, -104.002, 116.63]
         # 替换 [] 为实测关节角列表，例如下一行格式（不要照搬示意值）：
